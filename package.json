@@ -5,7 +5,7 @@
   "description": "Backend for the Fundify app",
   "main": "server.js",
   "repository": "git@github.com:NhiSty/Fundify-Back.git",
-  "author": "Nicolas Barbarisi <nico.bar2012@gmail.com>",
+  "author": "Nhisty",
   "license": "GNU GENERAL PUBLIC LICENSE",
   "private": true,
   "scripts": {
