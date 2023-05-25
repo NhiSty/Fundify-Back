@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 const http = require('http');
+const logger = require('morgan');
 const app = require('./app');
 
 const server = http.createServer(app);
@@ -37,6 +38,8 @@ const errorHandler = (error) => {
       throw error;
   }
 };
+
+app.use(logger('dev'));
 
 server.on('error', errorHandler);
 server.on('listening', () => {
