@@ -1,0 +1,30 @@
+version: '3.4'
+services:
+  node:
+    container_name: node
+    image: node:latest
+    working_dir: /var/www/html/app/
+    user: node
+    volumes:
+      - ./:/var/www/html/app/
+    ports:
+      - 1337:1337
+    tty: true
+    stdin_open: true
+    command: sh -c "yarn && yarn dev"
+  
+  mailhog:
+    container_name: mailhog
+    image: mailhog/mailhog:latest
+    ports:
+      - 8025:8025
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus:/etc/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+  
