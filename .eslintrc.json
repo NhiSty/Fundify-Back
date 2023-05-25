@@ -11,6 +11,8 @@
         "ecmaVersion": "latest"
     },
     "rules": {
+        "semi": "error",
+        "quotes": ["error", "single"],
         "yoda": "error"
     }
 }

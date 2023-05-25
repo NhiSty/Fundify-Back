@@ -1,4 +1,6 @@
+/* eslint-disable no-console */
 const express = require('express');
+
 const app = express();
 const bodyParser = require('body-parser');
 require('dotenv').config();
@@ -8,6 +10,7 @@ const path = require('path');
 app.use(bodyParser.json());
 
 const userRoutes = require('./routes/user');
+
 app.use('/api/auth', userRoutes);
 
 app.use((req, res, next) => {
@@ -17,9 +20,13 @@ app.use((req, res, next) => {
   next();
 });
 
-mongoose.connect(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_DB}.ati5zoa.mongodb.net/?retryWrites=true&w=majority`,
-  { useNewUrlParser: true,
-    useUnifiedTopology: true })
+mongoose.connect(
+  `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_DB}.ati5zoa.mongodb.net/?retryWrites=true&w=majority`,
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  },
+)
   .then(() => console.log('[\x1b[32mOK\x1b[0m] MongoDB connection'))
   .catch((error) => console.log(`[\x1b[31mERROR\x1b[0m] ${error}`));
 
