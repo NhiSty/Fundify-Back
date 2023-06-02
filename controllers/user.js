@@ -1,6 +1,7 @@
 /**
  * @file User controller for MongoDB database.
  * @module controllers/user
+ * @requires models/User
  */
 
 const bcrypt = require('bcrypt');
