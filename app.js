@@ -1,4 +1,11 @@
 /* eslint-disable no-console */
+/**
+ * @fileoverview
+ * This file is the entry point of the application.
+ * It creates the server and listens to the port defined in the environment variables.
+ * It also handles the errors.
+ * @module app
+ */
 const express = require('express');
 
 const app = express();
@@ -11,6 +18,11 @@ app.use(bodyParser.json());
 
 const userRoutes = require('./routes/user');
 
+/**
+ * Use the user routes.
+ * @name api/auth
+ * @type {Router}
+ */
 app.use('/api/auth', userRoutes);
 
 app.use((req, res, next) => {
@@ -30,6 +42,18 @@ mongoose.connect(
   .then(() => console.log('[\x1b[32mOK\x1b[0m] MongoDB connection'))
   .catch((error) => console.log(`[\x1b[31mERROR\x1b[0m] ${error}`));
 
+/**
+ * Serve static files.
+ * @name public
+ * @type {string}
+ */
 app.use('/', express.static(path.join(__dirname, './public')));
 
+/**
+ * Export express app.
+ * @type {Express}
+ * @name app
+ * @exports app
+ * @see {@link https://expressjs.com/en/4x/api.html#app}
+ */
 module.exports = app;

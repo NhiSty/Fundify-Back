@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Home</title>
+    <title>JSDoc: Source: models/User.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,41 +17,44 @@
 
 <div id="main">
 
-    <h1 class="page-title">Home</h1>
+    <h1 class="page-title">Source: models/User.js</h1>
 
     
 
 
 
     
-
-
-    <h3> </h3>
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
     <section>
-        <article><h2>Models</h2>
-<p>This folder contains all the models of the application.</p>
-<h3>Structure</h3>
-<p>The models are divided into different files, each file contains the model of a specific entity.</p>
-<h3>Naming</h3>
-<p>The name of the file is the name of the entity in singular and capitalized.</p></article>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file User model for MongoDB database.
+ * @module models/User
+ */
+
+const mongoose = require('mongoose');
+const uniqueValidator = require('mongoose-unique-validator');
+
+/**
+ * User model.
+ * @typedef {Object} UserSchema
+ * @property {string} email - User email. Required. Must be unique.
+ * @property {string} password - User password. Required.
+ */
+const userSchema = mongoose.Schema({
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+});
+
+userSchema.plugin(uniqueValidator);
+
+/**
+ * Exports the User model.
+ * @type {object}
+ */
+module.exports = mongoose.model('User', userSchema);
+</code></pre>
+        </article>
     </section>
-
-
 
 
 
