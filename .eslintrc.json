@@ -14,5 +14,11 @@
         "semi": "error",
         "quotes": ["error", "single"],
         "yoda": "error"
-    }
+    },
+    "ignorePatterns": [
+        "node_modules/",
+        "out/",
+        "public/",
+        "tests/"
+    ] 
 }

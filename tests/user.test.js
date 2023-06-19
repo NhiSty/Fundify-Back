@@ -7,7 +7,6 @@ const User = require('../models/User');
 require('dotenv').config();
 
 describe('Signup API', () => {
-
   beforeEach(async () => {
     // Delete user that was created during previous test
     await User.deleteOne({ email: 'test@test.com' });
@@ -43,7 +42,7 @@ describe('Signup API', () => {
     // Verify that the password is hashed
     const isPasswordMatch = await bcrypt.compare(
       userData.password,
-      user.password
+      user.password,
     );
     expect(isPasswordMatch).toBeTruthy();
   });
@@ -74,5 +73,4 @@ describe('Signup API', () => {
         expect(response.body.error).toBe('User already exists');
       });
   });
-
 });
