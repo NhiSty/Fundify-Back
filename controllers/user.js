@@ -63,10 +63,8 @@ exports.signup = (req, res) => {
         case req.body.curenncy === '':
           return res.status(400).json({ error: 'Curenncy is empty' });
         // curenncy must be 3 letters in uppercase
-        case !/^[A-Z]{3}$/.test(req.body.curenncy):
-          return res
-            .status(400)
-            .json({ error: 'Curenncy must be 3 letters in uppercase' });
+        case req.body.curenncy.length !== 3:
+          return res.status(400).json({ error: 'Curenncy must be 3 letters' });
         default:
           break;
       }
