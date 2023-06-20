@@ -22,7 +22,7 @@
   "private": true,
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js",
+    "dev": "nodemon -L server.js",
     "test": "jest --coverage",
     "doc": "jsdoc .",
     "lint": "eslint ."
@@ -43,7 +43,7 @@
     "sequelize": "^6.31.1"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.1",
+    "@types/jest": "^29.5.2",
     "eslint": "^7.32.0 || ^8.2.0",
     "eslint-config-airbnb-base": "latest",
     "eslint-plugin-import": "^2.25.2",
