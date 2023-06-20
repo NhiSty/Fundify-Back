@@ -5,7 +5,7 @@ const validator = require('../validator/UserValidator');
 
 exports.signup = async (req, res) => {
   if (!validator.validateEmail(req.body.email) || !validator.validatePassword(req.body.password)) {
-    return res.status(400).json();
+    return res.status(422).json();
   }
   try {
     const password = await bcrypt.hash(req.body.password, 10);
@@ -30,13 +30,13 @@ exports.signup = async (req, res) => {
 
 exports.login = async (req, res) => {
   if (!validator.validateEmail(req.body.email) || !validator.validatePassword(req.body.password)) {
-    return res.status(400).json();
+    return res.status(422).json();
   }
 
   try {
     const user = await User.findOne({ email: req.body.email.toString() });
     if (!user) {
-      return res.status(401).json();
+      return res.status(404).json();
     }
     const valid = await bcrypt.compare(req.body.password, user.password);
 
