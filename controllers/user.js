@@ -1,8 +1,21 @@
+/**
+ * @file User controller for MongoDB database.
+ * @module controllers/user
+ * @requires models/User
+ */
+
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const validator = require('../validator/UserValidator');
 
+/**
+ * Creates a new user in the database.
+ * @function signup
+ * @param {*} req - Express request object
+ * @param {*} res - Express response object
+ * @returns {Object} - Status code and message
+ */
 exports.signup = async (req, res) => {
   if (!validator.validateEmail(req.body.email) || !validator.validatePassword(req.body.password)) {
     return res.status(422).json();
@@ -28,6 +41,13 @@ exports.signup = async (req, res) => {
   return res.status(500).json();
 };
 
+/**
+ * Checks if the user exists in the database and if the password is correct, then returns a token.
+ * @function login
+ * @param {*} req - Express request object
+ * @param {*} res - Express response object
+ * @returns {Object} - Status code and message
+ */
 exports.login = async (req, res) => {
   if (!validator.validateEmail(req.body.email) || !validator.validatePassword(req.body.password)) {
     return res.status(422).json();
