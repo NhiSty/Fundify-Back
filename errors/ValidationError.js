@@ -6,7 +6,7 @@ class ValidationError extends Error {
   }
 }
 
-ValidationError.createFromSequelizeValidationError = function (e) {
+ValidationError.createFromSequelizeValidationError = function createFromSequelizeValidationError(e) {
   return new ValidationError(
     e.errors.reduce((acc, error) => {
       if (!acc[error.path]) {

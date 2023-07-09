@@ -24,7 +24,7 @@ app.use((req, res, next) => {
       return res.sendStatus(400);
     }
   }
-  next();
+  return next();
 });
 
 app.use(errorHandler);
