@@ -12,7 +12,7 @@ services:
     tty: true
     stdin_open: true
     command: sh -c "yarn && yarn dev"
-  
+
   mailhog:
     container_name: mailhog
     image: mailhog/mailhog:latest
@@ -27,4 +27,27 @@ services:
       - ./prometheus:/etc/prometheus
     command:
       - --config.file=/etc/prometheus/prometheus.yml
-  
+
+  database:
+    image: postgres:13-alpine
+    environment:
+      POSTGRES_DB: app
+      POSTGRES_PASSWORD: ChangeMe
+      POSTGRES_USER: nodejs
+    volumes:
+      - db_data:/var/lib/postgresql/data:rw
+
+  adminer:
+    image: adminer
+    restart: always
+    depends_on:
+      - database
+    ports:
+      - 8080:8080
+    environment:
+      POSTGRES_USER: nodejs
+      POSTGRES_PASSWORD: ChangeMe
+      POSTGRES_DB: app
+
+volumes:
+    db_data:
