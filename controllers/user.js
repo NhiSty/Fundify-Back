@@ -1,6 +1,4 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const db = require('../db/index');
 const validator = require('../validator/UserValidator');
 
 exports.signup = async (req, res) => {
@@ -8,17 +6,16 @@ exports.signup = async (req, res) => {
     return res.status(422).json();
   }
   try {
-    const password = await bcrypt.hash(req.body.password, 10);
-    const user = new User({
+    const userCreated = await db.User.create({
       email: req.body.email,
-      password,
+      password: req.body.password,
+      lastname: req.body.lastname,
+      firstname: req.body.firstname,
     });
-    const userCreated = await user.save();
     if (userCreated) {
       return res.status(201).json({
         data: {
           email: userCreated.email,
-          userId: userCreated.id,
         },
       });
     }
@@ -34,11 +31,11 @@ exports.login = async (req, res) => {
   }
 
   try {
-    const user = await User.findOne({ email: req.body.email.toString() });
+    const user = await db.User.findOne({ where: { email: req.body.email } });
     if (!user) {
       return res.status(404).json();
     }
-    const valid = await bcrypt.compare(req.body.password, user.password);
+    const valid = await user.checkPassword(req.body.password);
 
     if (!valid) {
       return res.status(401).json();
@@ -46,11 +43,7 @@ exports.login = async (req, res) => {
 
     return res.status(200).json({
       userId: user.id,
-      token: jwt.sign(
-        { userId: user.id },
-        `${process.env.JWT_SECRET}`,
-        { expiresIn: '24h' },
-      ),
+      token: user.generateToken(),
     });
   } catch (e) {
     console.log(e);
