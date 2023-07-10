@@ -12,9 +12,14 @@
         "ecmaVersion": "latest"
     },
     "rules": {
+        "max-len": ["warn", { "code": 120 }],
         "semi": "error",
         "quotes": ["error", "single"],
         "yoda": "error"
-    }
-
+    },
+    "ignorePatterns": [
+        "node_modules/",
+        "out/",
+        "public/"
+    ]
 }
