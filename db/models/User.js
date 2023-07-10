@@ -1,13 +1,16 @@
 const { Model, DataTypes } = require('sequelize');
 
+// eslint-disable-next-line func-names
 module.exports = function (connection) {
   class User extends Model {
     async checkPassword(password) {
+      // eslint-disable-next-line global-require
       const bcrypt = require('bcrypt');
       return bcrypt.compare(password, this.password);
     }
 
     generateToken() {
+      // eslint-disable-next-line global-require
       const jwt = require('jsonwebtoken');
       return jwt.sign({ id: this.id }, process.env.JWT_SECRET, {
         expiresIn: '1y',
@@ -51,9 +54,11 @@ module.exports = function (connection) {
     if (!options?.fields.includes('password')) {
       return;
     }
+    // eslint-disable-next-line global-require
     const bcrypt = require('bcrypt');
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(user.password, salt);
+    // eslint-disable-next-line no-param-reassign
     user.password = hash;
   }
 

@@ -11,6 +11,7 @@ const db = require('./db/index');
 
 app.use(bodyParser.json());
 app.use(cors());
+// eslint-disable-next-line consistent-return
 app.use((req, res, next) => {
   if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
     if (!req.is('application/json')) {

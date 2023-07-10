@@ -46,6 +46,7 @@ exports.login = async (req, res) => {
       token: user.generateToken(),
     });
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.log(e);
   }
   return res.status(500).json();
