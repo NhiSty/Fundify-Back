@@ -21,20 +21,15 @@
 
 ## Install
 
-First, you need to create a .env file at the root of the project and fill it with the following variables:
-
-```
-MONGO_USER=[username]
-MONGO_PASSWORD=[password]
-MONGO_DB=[database]
-
-SERVER_PORT=[port]
-```
-
+First, copy the .env.example file and rename it .env and fill it with your own values.
 Then you need to start your environment with docker-compose
 
 ```sh
+# Start the environment
 docker-compose up --build
+
+# sync the database with the models
+docker compose exec node node migrate.js
 ```
 
 The container will automatically install the dependencies and start the server on the port you specified in the .env file.
