@@ -6,6 +6,7 @@ const userCtrl = require('../controllers/user');
 
 router.post('/signup', userCtrl.signup);
 router.post('/login', userCtrl.login);
+router.get('/logout', userCtrl.logout);
 
 router.get('/', (req, res) => res.send('Hello World!'));
 module.exports = router;

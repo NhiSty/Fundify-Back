@@ -7,52 +7,53 @@ exports.signup = async (req, res) => {
   }
 
   try {
-    const userCreated = await db.User.create({
+    const merchandCreated = await db.Merchand.create({
       email: req.body.email,
       password: req.body.password,
       lastname: req.body.lastname,
       firstname: req.body.firstname,
+      society: req.body.society,
+      kbis: req.body.kbis,
+      phone: req.body.phone,
+      currency: req.body.currency,
     });
-    if (userCreated) {
+    if (merchandCreated) {
       return res.status(201).json({
         data: {
-          email: userCreated.email,
+          email: merchandCreated.email,
         },
       });
     }
   } catch (e) {
-    return res.status(409).json({ message: 'Email already used' });
+    console.log(e);
+    return res.status(409).json({ message: 'Email already used  ' });
   }
   return res.status(500).json();
 };
+
 exports.login = async (req, res) => {
   if (!validator.validateEmail(req.body.email) || !validator.validatePassword(req.body.password)) {
     return res.status(422).json();
   }
 
   try {
-    const user = await db.User.findOne({ where: { email: req.body.email } });
-    if (!user) {
+    const merchand = await db.Merchand.findOne({ where: { email: req.body.email } });
+    if (!merchand) {
       return res.status(404).json();
     }
-    const valid = await user.checkPassword(req.body.password);
+    const valid = await merchand.checkPassword(req.body.password);
 
     if (!valid) {
       return res.status(401).json();
     }
 
-    const sign = user.generateToken();
-
-    return res.cookie(
-      'token',
-      sign,
-      { httpOnly: false, secure: false },
-    ).status(200).json();
+    return res.status(200).json({
+      userId: merchand.id,
+      token: merchand.generateToken(),
+    });
   } catch (e) {
     // eslint-disable-next-line no-console
     console.log(e);
   }
   return res.status(500).json();
 };
-// eslint-disable-next-line max-len
-exports.logout = async (req, res) => res.clearCookie('token').status(200).json();

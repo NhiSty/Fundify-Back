@@ -7,6 +7,8 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const errorHandler = require('./middleware/errorHandler');
 const userRoutes = require('./routes/user');
+const merchandRoutes = require('./routes/merchand');
+const adminRoutes = require('./routes/admin');
 const db = require('./db/index');
 
 app.use(bodyParser.json());
@@ -22,6 +24,8 @@ app.use((req, res, next) => {
 });
 app.use(errorHandler);
 app.use('/api/auth', userRoutes);
+app.use('/api/auth/merchand', merchandRoutes);
+app.use('/api/admin', adminRoutes);
 
 try {
   db.connection.authenticate().then(() => {

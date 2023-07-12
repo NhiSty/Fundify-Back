@@ -2,24 +2,23 @@ const { Model, DataTypes } = require('sequelize');
 
 // eslint-disable-next-line func-names
 module.exports = function (connection) {
-  class User extends Model {
+  class Merchand extends Model {
     async checkPassword(password) {
-      // eslint-disable-next-line global-require
+      // eslint-disable-next-line global-require,no-shadow
       const bcrypt = require('bcrypt');
       return bcrypt.compare(password, this.password);
     }
 
     generateToken() {
-      // eslint-disable-next-line global-require
+      // eslint-disable-next-line global-require,no-shadow
       const jwt = require('jsonwebtoken');
       return jwt.sign({ id: this.id }, process.env.JWT_SECRET, {
         expiresIn: '1y',
-
       });
     }
   }
 
-  User.init(
+  Merchand.init(
     {
       lastname: {
         type: DataTypes.STRING,
@@ -49,15 +48,26 @@ module.exports = function (connection) {
           min: 8,
         },
       },
+      society: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      kbis: { type: DataTypes.STRING, allowNull: false },
+      phone: { type: DataTypes.STRING, allowNull: false },
+      confirmationUrl: { type: DataTypes.STRING, allowNull: true },
+      rejectUrl: { type: DataTypes.STRING, allowNull: true },
+      currency: { type: DataTypes.STRING, allowNull: false },
+      confirmation: { type: DataTypes.BOOLEAN, allowNull: true },
       role: {
         type: DataTypes.STRING,
         allowNull: false,
-        defaultValue: 'USER',
+        defaultValue: 'MERCHAND',
       },
+
     },
     {
       sequelize: connection,
-      tableName: 'users',
+      tableName: 'merchands',
     },
   );
 
@@ -73,8 +83,8 @@ module.exports = function (connection) {
     user.password = hash;
   }
 
-  User.addHook('beforeCreate', encryptPassword);
-  User.addHook('beforeUpdate', encryptPassword);
+  Merchand.addHook('beforeCreate', encryptPassword);
+  Merchand.addHook('beforeUpdate', encryptPassword);
 
-  return User;
+  return Merchand;
 };
