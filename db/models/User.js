@@ -20,8 +20,14 @@ module.exports = function (connection) {
 
   User.init(
     {
-      lastname: DataTypes.STRING,
-      firstname: DataTypes.STRING,
+      lastname: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      firstname: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
       email: {
         type: DataTypes.STRING,
         unique: true,
