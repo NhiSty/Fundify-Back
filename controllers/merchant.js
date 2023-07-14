@@ -1,13 +1,18 @@
 const db = require('../db/index');
 const validator = require('../validator/UserValidator');
+const merchantService = require('../service/merchant');
 
 exports.signup = async (req, res) => {
   if (!validator.validateEmail(req.body.email) || !validator.validatePassword(req.body.password)) {
     return res.status(422).json();
   }
+  const existingMerchant = await merchantService.findByEmail(req.body.email);
+  if (existingMerchant) {
+    return res.status(409).json({ message: 'Email already used' });
+  }
 
   try {
-    const merchandCreated = await db.Merchand.create({
+    const merchantCreated = await merchantService.create({
       email: req.body.email,
       password: req.body.password,
       lastname: req.body.lastname,
@@ -16,17 +21,16 @@ exports.signup = async (req, res) => {
       kbis: req.body.kbis,
       phone: req.body.phone,
       currency: req.body.currency,
+      rejectUrl: req.body.rejectUrl,
+      confirmationUrl: req.body.confirmationUrl,
     });
-    if (merchandCreated) {
+    if (merchantCreated) {
       return res.status(201).json({
-        data: {
-          email: merchandCreated.email,
-        },
+        data: merchantCreated,
       });
     }
   } catch (e) {
-    console.log(e);
-    return res.status(409).json({ message: 'Email already used  ' });
+    return res.status(500).json();
   }
   return res.status(500).json();
 };
@@ -37,19 +41,19 @@ exports.login = async (req, res) => {
   }
 
   try {
-    const merchand = await db.Merchand.findOne({ where: { email: req.body.email } });
-    if (!merchand) {
+    const merchant = await db.Merchant.findOne({ where: { email: req.body.email } });
+    if (!merchant) {
       return res.status(404).json();
     }
-    const valid = await merchand.checkPassword(req.body.password);
+    const valid = await merchant.checkPassword(req.body.password);
 
     if (!valid) {
       return res.status(401).json();
     }
 
     return res.status(200).json({
-      userId: merchand.id,
-      token: merchand.generateToken(),
+      userId: merchant.id,
+      token: merchant.generateToken(),
     });
   } catch (e) {
     // eslint-disable-next-line no-console

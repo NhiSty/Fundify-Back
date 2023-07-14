@@ -7,7 +7,7 @@ exports.validate = async (req, res) => {
   }
 
   try {
-    const user = await db.Merchand.findOne({ where: { email: req.body.email } });
+    const user = await db.Merchant.findOne({ where: { email: req.body.email } });
     if (!user) {
       return res.status(404).json();
     }
@@ -31,7 +31,7 @@ exports.invalidate = async (req, res) => {
   }
 
   try {
-    const user = await db.Merchand.findOne({ where: { email: req.body.email } });
+    const user = await db.Merchant.findOne({ where: { email: req.body.email } });
     if (!user) {
       return res.status(404).json();
     }

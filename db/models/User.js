@@ -5,7 +5,7 @@ module.exports = function (connection) {
   class User extends Model {
     async checkPassword(password) {
       // eslint-disable-next-line global-require
-      const bcrypt = require('bcrypt');
+      const bcrypt = require('bcryptjs');
       return bcrypt.compare(password, this.password);
     }
 
@@ -66,7 +66,7 @@ module.exports = function (connection) {
       return;
     }
     // eslint-disable-next-line global-require
-    const bcrypt = require('bcrypt');
+    const bcrypt = require('bcryptjs');
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(user.password, salt);
     // eslint-disable-next-line no-param-reassign
