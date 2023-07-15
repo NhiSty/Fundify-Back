@@ -26,7 +26,7 @@ exports.signup = async (req, res) => {
     }
   } catch (e) {
     console.log(e);
-    return res.status(409).json({ message: 'Email already used  ' });
+    return res.status(409).json({ message: 'Email already used' });
   }
   return res.status(500).json();
 };

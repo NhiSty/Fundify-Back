@@ -6,6 +6,7 @@ const app = express();
 const bodyParser = require('body-parser');
 const path = require('path');
 const errorHandler = require('./middleware/errorHandler');
+const auth = require('./middleware/auth');
 const userRoutes = require('./routes/user');
 const merchandRoutes = require('./routes/merchand');
 const adminRoutes = require('./routes/admin');
@@ -23,8 +24,10 @@ app.use((req, res, next) => {
   next();
 });
 app.use(errorHandler);
+
 app.use('/api/auth', userRoutes);
 app.use('/api/auth/merchand', merchandRoutes);
+app.use(auth);
 app.use('/api/admin', adminRoutes);
 
 try {
