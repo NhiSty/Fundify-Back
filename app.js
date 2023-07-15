@@ -7,8 +7,9 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const errorHandler = require('./middleware/errorHandler');
 const auth = require('./middleware/auth');
+const admin = require('./middleware/admin');
 const userRoutes = require('./routes/user');
-const merchandRoutes = require('./routes/merchand');
+const merchantRoutes = require('./routes/merchant');
 const adminRoutes = require('./routes/admin');
 const db = require('./db/index');
 
@@ -26,8 +27,10 @@ app.use((req, res, next) => {
 app.use(errorHandler);
 
 app.use('/api/auth', userRoutes);
-app.use('/api/auth/merchand', merchandRoutes);
+app.use('/api/auth/merchant', merchantRoutes);
 app.use(auth);
+
+app.use(admin);
 app.use('/api/admin', adminRoutes);
 
 try {

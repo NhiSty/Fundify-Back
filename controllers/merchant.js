@@ -7,7 +7,7 @@ exports.signup = async (req, res) => {
   }
 
   try {
-    const merchandCreated = await db.Merchand.create({
+    const merchandCreated = await db.Merchant.create({
       email: req.body.email,
       password: req.body.password,
       lastname: req.body.lastname,
@@ -16,6 +16,8 @@ exports.signup = async (req, res) => {
       kbis: req.body.kbis,
       phone: req.body.phone,
       currency: req.body.currency,
+      rejectUrl: req.body.rejectUrl,
+      confirmationUrl: req.body.confirmationUrl,
     });
     if (merchandCreated) {
       return res.status(201).json({
@@ -37,7 +39,7 @@ exports.login = async (req, res) => {
   }
 
   try {
-    const merchand = await db.Merchand.findOne({ where: { email: req.body.email } });
+    const merchand = await db.Merchant.findOne({ where: { email: req.body.email } });
     if (!merchand) {
       return res.status(404).json();
     }

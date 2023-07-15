@@ -12,7 +12,7 @@ module.exports = function (connection) {
     generateToken() {
       // eslint-disable-next-line global-require
       const jwt = require('jsonwebtoken');
-      return jwt.sign({ id: this.id }, process.env.JWT_SECRET, {
+      return jwt.sign({ id: this.id, role: this.role }, process.env.JWT_SECRET, {
         expiresIn: '1y',
 
       });
