@@ -2,10 +2,10 @@ const express = require('express');
 
 const router = express.Router();
 
-const merchandCtrl = require('../controllers/merchand');
+const merchantCtrl = require('../controllers/merchant');
 
-router.post('/signup', merchandCtrl.signup);
-router.post('/login', merchandCtrl.login);
+router.post('/signup', merchantCtrl.signup);
+router.post('/login', merchantCtrl.login);
 
 router.get('/', (req, res) => res.send('Hello World!'));
 module.exports = router;

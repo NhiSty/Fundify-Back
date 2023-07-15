@@ -2,10 +2,10 @@ const { Model, DataTypes } = require('sequelize');
 
 // eslint-disable-next-line func-names
 module.exports = function (connection) {
-  class Merchand extends Model {
+  class Merchant extends Model {
     async checkPassword(password) {
       // eslint-disable-next-line global-require,no-shadow
-      const bcrypt = require('bcrypt');
+      const bcrypt = require('bcryptjs');
       return bcrypt.compare(password, this.password);
     }
 
@@ -18,7 +18,7 @@ module.exports = function (connection) {
     }
   }
 
-  Merchand.init(
+  Merchant.init(
     {
       lastname: {
         type: DataTypes.STRING,
@@ -54,20 +54,20 @@ module.exports = function (connection) {
       },
       kbis: { type: DataTypes.STRING, allowNull: false },
       phone: { type: DataTypes.STRING, allowNull: false },
-      confirmationUrl: { type: DataTypes.STRING, allowNull: true },
-      rejectUrl: { type: DataTypes.STRING, allowNull: true },
+      confirmationUrl: { type: DataTypes.STRING, allowNull: false },
+      rejectUrl: { type: DataTypes.STRING, allowNull: false },
       currency: { type: DataTypes.STRING, allowNull: false },
-      confirmation: { type: DataTypes.BOOLEAN, allowNull: true },
+      confirmation: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
       role: {
         type: DataTypes.STRING,
-        allowNull: false,
-        defaultValue: 'MERCHAND',
+        allowNull: true,
+        defaultValue: 'MERCHANT',
       },
 
     },
     {
       sequelize: connection,
-      tableName: 'merchands',
+      tableName: 'merchants',
     },
   );
 
@@ -76,15 +76,15 @@ module.exports = function (connection) {
       return;
     }
     // eslint-disable-next-line global-require
-    const bcrypt = require('bcrypt');
+    const bcrypt = require('bcryptjs');
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(user.password, salt);
     // eslint-disable-next-line no-param-reassign
     user.password = hash;
   }
 
-  Merchand.addHook('beforeCreate', encryptPassword);
-  Merchand.addHook('beforeUpdate', encryptPassword);
+  Merchant.addHook('beforeCreate', encryptPassword);
+  Merchant.addHook('beforeUpdate', encryptPassword);
 
-  return Merchand;
+  return Merchant;
 };
