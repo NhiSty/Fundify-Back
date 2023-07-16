@@ -23,4 +23,11 @@ module.exports = {
     }
     return true;
   },
+  validateRole: (role) => {
+    if (!role || role === '' || typeof (role) !== 'string'
+      || (role !== 'USER' && role !== 'ADMIN')) {
+      return false;
+    }
+    return true;
+  },
 };

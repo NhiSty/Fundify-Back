@@ -55,7 +55,50 @@ describe('User lastname validator', () => {
   it('undefined lastname should return false', () => {
     expect(UserValidator.validateLastname(undefined)).toBe(false);
   });
-  it('lastname with number should return false', () => {
+  it('number lastname should return false', () => {
     expect(UserValidator.validateLastname(1)).toBe(false);
+  });
+});
+
+describe('User firstName validator', () => {
+  it('valid firstname should return true', () => {
+    expect(UserValidator.validateFirstname('Dupont')).toBe(true);
+  });
+  it('empty firstname should return false', () => {
+    expect(UserValidator.validateFirstname('')).toBe(false);
+  });
+  it('null firstname should return false', () => {
+    expect(UserValidator.validateFirstname(null)).toBe(false);
+  });
+  it('undefined firstname should return false', () => {
+    expect(UserValidator.validateFirstname(undefined)).toBe(false);
+  });
+  it('number firstname should return false', () => {
+    expect(UserValidator.validateFirstname(1)).toBe(false);
+  });
+});
+
+describe('User role validator', () => {
+  it('valid role should return true', () => {
+    expect(UserValidator.validateRole('USER')).toBe(true);
+  });
+
+  it('Inexistant role should return false', () => {
+    expect(UserValidator.validateRole('Serkan')).toBe(false);
+  });
+
+  it('empty role should return false', () => {
+    expect(UserValidator.validateRole('')).toBe(false);
+  });
+
+  it('null role should return false', () => {
+    expect(UserValidator.validateRole(null)).toBe(false);
+  });
+  it('undefined role should return false', () => {
+    expect(UserValidator.validateRole(undefined)).toBe(false);
+  });
+
+  it('number role should return false', () => {
+    expect(UserValidator.validateRole(1)).toBe(false);
   });
 });
