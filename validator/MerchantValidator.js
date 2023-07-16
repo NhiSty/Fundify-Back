@@ -29,12 +29,6 @@ module.exports = {
     }
     return true;
   },
-  validateKbis: (kbis) => {
-    if (!kbis || kbis === '' || typeof (kbis) !== 'string') {
-      return false;
-    }
-    return true;
-  },
   validatePhoneNumber: (phoneNumber) => {
     if (!phoneNumber || phoneNumber === '' || typeof (phoneNumber) !== 'string') {
       return false;

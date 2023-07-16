@@ -96,24 +96,6 @@ describe('Merchant society validator', () => {
   });
 });
 
-describe('Merchant kbis validator', () => {
-  it('valid kbis should return true', () => {
-    expect(MerchantValidator.validateKbis('Dupont')).toBe(true);
-  });
-  it('empty kbis should return false', () => {
-    expect(MerchantValidator.validateKbis('')).toBe(false);
-  });
-  it('null kbis should return false', () => {
-    expect(MerchantValidator.validateKbis(null)).toBe(false);
-  });
-  it('undefined kbis should return false', () => {
-    expect(MerchantValidator.validateKbis(undefined)).toBe(false);
-  });
-  it('number kbis should return false', () => {
-    expect(MerchantValidator.validateKbis(1)).toBe(false);
-  });
-});
-
 describe('Merchant phone validator', () => {
   it('valid phone should return true', () => {
     expect(MerchantValidator.validatePhoneNumber('0606060606')).toBe(true);
