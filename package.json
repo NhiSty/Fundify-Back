@@ -43,14 +43,15 @@
     "pg": "^8.11.0",
     "pg-hstore": "^2.3.4",
     "readme-md-generator": "^1.0.0",
-    "sequelize": "^6.32.1"
+    "sequelize": "^6.32.1",
+    "sequelize-mock": "^0.10.2"
   },
   "devDependencies": {
     "@types/jest": "^29.5.2",
     "eslint": "^7.32.0 || ^8.2.0",
     "eslint-config-airbnb-base": "latest",
     "eslint-plugin-import": "^2.25.2",
-    "jest": "^29.5.0",
+    "jest": "^29.6.1",
     "jsdoc": "^4.0.2",
     "rimraf": "^5.0.1",
     "supertest": "^6.3.3"

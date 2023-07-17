@@ -26,6 +26,10 @@ app.use((req, res, next) => {
 });
 app.use(errorHandler);
 
+app.get('/toto', (req, res) => {
+  res.status(200).send('Hello World!');
+});
+
 app.use('/api/auth', userRoutes);
 app.use('/api/auth/merchant', merchantRoutes);
 app.use(auth);
@@ -33,6 +37,7 @@ app.use(auth);
 app.use(admin);
 app.use('/api/admin', adminRoutes);
 
+/*
 try {
   db.connection.authenticate().then(() => {
     console.log('Connection has been established successfully.');
@@ -41,5 +46,6 @@ try {
   console.error('Unable to connect to the database:', error);
 }
 
+ */
 app.use('/', express.static(path.join(__dirname, './public')));
 module.exports = app;
