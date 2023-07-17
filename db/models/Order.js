@@ -1,7 +1,7 @@
-const { DataTypes } = require("sequelize");
-const sequelize = require("../index");
+const { DataTypes } = require('sequelize');
+const sequelize = require('../index');
 
-const Order = sequelize.define("Order", {
+const Order = sequelize.define('Order', {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -46,7 +46,7 @@ const Order = sequelize.define("Order", {
   totalAmount: {
     type: DataTypes.NUMBER,
     allowNull: false,
-  }
+  },
 });
 
 module.exports = Order;

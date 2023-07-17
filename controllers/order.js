@@ -48,7 +48,7 @@ exports.getOneOrder = async (req, res) => {
     console.error(err);
     res.status(500).json({ err });
   }
-}
+};
 
 exports.getAllOrders = async (req, res) => {
   try {
@@ -58,7 +58,7 @@ exports.getAllOrders = async (req, res) => {
     console.error(err);
     res.status(500).json({ err });
   }
-}
+};
 
 exports.updateOrder = async (req, res) => {
   const { id } = req.params;
@@ -95,12 +95,12 @@ exports.updateOrder = async (req, res) => {
       totalAmount,
     });
 
-    res.json({ message: 'Order updated' });
+    return res.json({ message: 'Order updated' });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ err });
+    return res.status(500).json({ err });
   }
-}
+};
 
 exports.deleteOrder = async (req, res) => {
   const { id } = req.params;
@@ -114,9 +114,9 @@ exports.deleteOrder = async (req, res) => {
 
     await order.destroy();
 
-    res.json({ message: 'Order deleted' });
+    return res.json({ message: 'Order deleted' });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ err });
+    return res.status(500).json({ err });
   }
-}
+};
