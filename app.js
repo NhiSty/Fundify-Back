@@ -5,14 +5,12 @@ const cors = require('cors');
 const app = express();
 const bodyParser = require('body-parser');
 const path = require('path');
-const logger = require('morgan');
 const errorHandler = require('./middleware/errorHandler');
 const userRoutes = require('./routes/user');
 const db = require('./db/index');
 const orderRoutes = require('./routes/order');
 
 app.use(bodyParser.json());
-app.use(logger('dev'));
 app.use(cors());
 // eslint-disable-next-line consistent-return
 app.use((req, res, next) => {
