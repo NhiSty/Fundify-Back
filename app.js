@@ -8,6 +8,8 @@ const path = require('path');
 const errorHandler = require('./middleware/errorHandler');
 const userRoutes = require('./routes/user');
 const db = require('./db/index');
+const logger = require('morgan');
+const orderRoutes = require('./routes/order');
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -22,6 +24,7 @@ app.use((req, res, next) => {
 });
 app.use(errorHandler);
 app.use('/api/auth', userRoutes);
+app.use('/api/orders', orderRoutes);
 
 try {
   db.connection.authenticate().then(() => {
