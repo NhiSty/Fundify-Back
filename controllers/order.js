@@ -1,5 +1,6 @@
-const db = require("../db");  // Vérifiez que le chemin est correct
-const Order = db.Order;
+const db = require('../db');
+
+const { Order } = db;
 
 exports.createOrder = async (req, res) => {
   const {
@@ -33,8 +34,7 @@ exports.createOrder = async (req, res) => {
 
     res.json({ newOrder, paymentUrl });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ err: err.message });
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -46,8 +46,7 @@ exports.getOneOrder = async (req, res) => {
 
     res.json(order);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ err: err.message });
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -56,8 +55,7 @@ exports.getAllOrders = async (req, res) => {
     const orders = await Order.findAll();
     res.json(orders);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ err: err.message });
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -98,7 +96,6 @@ exports.updateOrder = async (req, res) => {
 
     return res.json({ message: 'Order updated' });
   } catch (err) {
-    console.error(err);
     return res.status(500).json({ err });
   }
 };
@@ -117,7 +114,6 @@ exports.deleteOrder = async (req, res) => {
 
     return res.json({ message: 'Order deleted' });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ err: err.message });
+    return res.status(500).json({ error: err.message });
   }
 };
