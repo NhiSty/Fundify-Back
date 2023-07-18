@@ -1,4 +1,4 @@
-const UserValidator = require('../../../validator/UserValidator');
+const UserValidator = require('../../validator/UserValidator');
 
 describe('User email validator', () => {
   it('valid email should return true', () => {

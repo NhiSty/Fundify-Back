@@ -12,13 +12,12 @@ module.exports = async (req, res, next) => {
     }
 
     if (user.role !== 'ADMIN') {
-      console.log(user);
       throw new Error('Invalid role');
     }
+
     next();
   } catch (error) {
     // Display error message
-    console.log(error);
     res.status(401)
       .json();
   }

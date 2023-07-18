@@ -26,10 +26,6 @@ app.use((req, res, next) => {
 });
 app.use(errorHandler);
 
-app.get('/toto', (req, res) => {
-  res.status(200).send('Hello World!');
-});
-
 app.use('/api/auth', userRoutes);
 app.use('/api/auth/merchant', merchantRoutes);
 app.use(auth);

@@ -1,4 +1,4 @@
-const MerchantValidator = require('../../../validator/MerchantValidator');
+const MerchantValidator = require('../../validator/MerchantValidator');
 
 describe('Merchant email validator', () => {
   it('valid email should return true', () => {

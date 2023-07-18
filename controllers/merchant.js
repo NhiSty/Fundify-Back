@@ -1,8 +1,16 @@
 const db = require('../db/index');
-const validator = require('../validator/UserValidator');
+const validator = require('../validator/MerchantValidator');
 
 exports.signup = async (req, res) => {
-  if (!validator.validateEmail(req.body.email) || !validator.validatePassword(req.body.password)) {
+  if (!validator.validateEmail(req.body.email)
+    || !validator.validatePassword(req.body.password)
+    || !validator.validatePhoneNumber(req.body.phone)
+    || !validator.validateRejectUrl(req.body.rejectUrl)
+    || !validator.validateConfirmationUrl(req.body.confirmationUrl)
+    || !validator.validateCurrency(req.body.currency)
+    || !validator.validateFirstname(req.body.firstname)
+    || !validator.validateLastname(req.body.lastname)
+    || !validator.validateSociety(req.body.society)) {
     return res.status(422).json();
   }
 
