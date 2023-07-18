@@ -2,7 +2,10 @@ const db = require('../db/index');
 const validator = require('../validator/UserValidator');
 
 exports.signup = async (req, res) => {
-  if (!validator.validateEmail(req.body.email) || !validator.validatePassword(req.body.password)) {
+  if (!validator.validateEmail(req.body.email)
+    || !validator.validatePassword(req.body.password)
+    || !validator.validateFirstname(req.body.firstname)
+    || !validator.validateLastname(req.body.lastname)) {
     return res.status(422).json();
   }
 
@@ -26,7 +29,8 @@ exports.signup = async (req, res) => {
   return res.status(500).json();
 };
 exports.login = async (req, res) => {
-  if (!validator.validateEmail(req.body.email) || !validator.validatePassword(req.body.password)) {
+  if (!validator.validateEmail(req.body.email)
+    || !validator.validatePassword(req.body.password)) {
     return res.status(422).json();
   }
 
