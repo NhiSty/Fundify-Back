@@ -14,7 +14,7 @@ const transactionRoutes = require('./routes/transaction');
 const operationRoutes = require('./routes/operation');
 const adminRoutes = require('./routes/admin');
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '5mb' }));
 app.use(cors());
 // eslint-disable-next-line consistent-return
 app.use((req, res, next) => {

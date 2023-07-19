@@ -23,9 +23,8 @@ module.exports = function (connection) {
       allowNull: false,
     },
     kbis: {
-      type: DataTypes.STRING,
+      type: DataTypes.BLOB,
       allowNull: false,
-      unique: true,
     },
     contactLastName: {
       type: DataTypes.STRING,
