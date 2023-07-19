@@ -12,7 +12,7 @@ module.exports = function (connection) {
     generateToken() {
       // eslint-disable-next-line global-require
       const jwt = require('jsonwebtoken');
-      return jwt.sign({ id: this.id }, process.env.JWT_SECRET, {
+      return jwt.sign({ id: this.id, isAdmin: this.isAdmin }, process.env.JWT_SECRET, {
         expiresIn: '1y',
       });
     }
@@ -40,13 +40,16 @@ module.exports = function (connection) {
         allowNull: false,
         validate: {
           min: 8,
-          // is: /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])/,
         },
+      },
+      isAdmin: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
       },
     },
     {
       sequelize: connection,
-      tableName: 'users',
+      modelName: 'User',
     },
   );
 
