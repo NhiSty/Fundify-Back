@@ -15,13 +15,15 @@ exports.signup = async (req, res) => {
   }
 
   try {
+    // On convertit la base64 en binaire
+    const binaryData = Buffer.from(req.body.kbis, 'base64');
     const merchandCreated = await db.Merchant.create({
       contactEmail: req.body.contactEmail,
       password: req.body.password,
       contactLastName: req.body.contactLastName,
       contactFirstName: req.body.contactFirstName,
       companyName: req.body.companyName,
-      kbis: req.body.kbis,
+      kbis: binaryData,
       contactPhone: req.body.contactPhone,
       currency: req.body.currency,
       confirmationRedirectUrl: req.body.confirmationRedirectUrl,
@@ -111,6 +113,7 @@ exports.getMerchantAccount = async (req, res) => {
       currency: merchant.currency,
       confirmationRedirectUrl: merchant.confirmationRedirectUrl,
       cancellationRedirectUrl: merchant.cancellationRedirectUrl,
+      kbis: merchant.kbis,
     });
   } catch (e) {
     console.log(e);
