@@ -4,8 +4,9 @@ const router = express.Router();
 
 const userCtrl = require('../controllers/user');
 
-router.post('/signup', userCtrl.signup);
-router.post('/login', userCtrl.login);
-
-router.get('/', (req, res) => res.send('Hello World!'));
-module.exports = router;
+module.exports = {
+  signup: router.post('/signup', userCtrl.signup),
+  login: router.post('/login', userCtrl.login),
+  logout: router.get('/logout', userCtrl.logout),
+  setAdmin: router.put('/admin/user/setAdmin', userCtrl.setAdmin),
+};
