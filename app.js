@@ -20,14 +20,14 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.json({ limit: '5mb' }));
 app.use(cors());
 // eslint-disable-next-line consistent-return
-/*app.use((req, res, next) => {
+/* app.use((req, res, next) => {
   if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
     if (!req.is('application/json')) {
       return res.status(400).json();
     }
   }
   next();
-});*/
+}); */
 
 app.use(errorHandler);
 app.use('/api/', sdkRoutes);
