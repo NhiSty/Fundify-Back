@@ -13,19 +13,24 @@ const merchantRoutes = require('./routes/merchant');
 const transactionRoutes = require('./routes/transaction');
 const operationRoutes = require('./routes/operation');
 const adminRoutes = require('./routes/admin');
+const sdkRoutes = require('./routes/sdk');
+
+app.set('view engine', 'ejs');
 
 app.use(bodyParser.json({ limit: '5mb' }));
 app.use(cors());
 // eslint-disable-next-line consistent-return
-app.use((req, res, next) => {
+/*app.use((req, res, next) => {
   if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
     if (!req.is('application/json')) {
       return res.status(400).json();
     }
   }
   next();
-});
+});*/
+
 app.use(errorHandler);
+app.use('/api/', sdkRoutes);
 app.use('/api/auth', userRoutes.signup);
 app.use('/api/auth', userRoutes.login);
 app.use('/api/auth', userRoutes.logout);

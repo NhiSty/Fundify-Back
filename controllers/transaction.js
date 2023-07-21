@@ -1,4 +1,5 @@
 const db = require('../db/index');
+
 const statusEnum = [
   'PENDING',
   'CONFIRMED',
