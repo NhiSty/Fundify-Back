@@ -1,4 +1,5 @@
 const { Model, DataTypes } = require('sequelize');
+const MerchantMongo = require('../../mongoDb/models/merchant');
 
 module.exports = function (connection) {
   class Merchant extends Model {
@@ -21,6 +22,7 @@ module.exports = function (connection) {
     companyName: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique: true,
     },
     kbis: {
       type: DataTypes.BLOB,
@@ -77,6 +79,29 @@ module.exports = function (connection) {
     modelName: 'Merchant',
     timestamps: true,
   });
+
+  Merchant.afterCreate(async (merchant) => {
+    // On crée un utilisateur dans la base de données mongoDb
+    const newMerchant = new MerchantMongo({
+      companyName: merchant.companyName,
+      firstName: merchant.contactFirstName,
+      lastName: merchant.contactLastName,
+      email: merchant.contactEmail,
+      phone: merchant.contactPhone,
+      approved: merchant.approved,
+    });
+
+    await newMerchant.save()
+      .then(() => {
+        // eslint-disable-next-line no-console
+        console.log('Merchant mongoDb created');
+      })
+      .catch((err) => {
+        // eslint-disable-next-line no-console
+        console.log(err);
+      });
+  });
+
   async function encryptPassword(user, options) {
     if (!options?.fields.includes('password')) {
       return;

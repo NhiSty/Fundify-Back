@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 const express = require('express');
 const cors = require('cors');
+require('./mongoDb/index');
 
 const app = express();
 const bodyParser = require('body-parser');
