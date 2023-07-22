@@ -1,5 +1,5 @@
 const { Model, DataTypes } = require('sequelize');
-const MerchantMongo = require('../../mongoDb/models/merchant');
+const MerchantMongo = require('../../mongoDb/models/Merchant');
 
 module.exports = function (connection) {
   class Merchant extends Model {
