@@ -80,9 +80,10 @@ module.exports = function (connection) {
     timestamps: true,
   });
 
+  // Après création d'un marchand (Postgres) on crée le marchand correspondant (MongoDB)
   Merchant.afterCreate(async (merchant) => {
-    // On crée un utilisateur dans la base de données mongoDb
     const newMerchant = new MerchantMongo({
+      merchantId: merchant.id,
       companyName: merchant.companyName,
       firstName: merchant.contactFirstName,
       lastName: merchant.contactLastName,
@@ -91,15 +92,27 @@ module.exports = function (connection) {
       approved: merchant.approved,
     });
 
-    await newMerchant.save()
-      .then(() => {
-        // eslint-disable-next-line no-console
-        console.log('Merchant mongoDb created');
-      })
-      .catch((err) => {
-        // eslint-disable-next-line no-console
-        console.log(err);
-      });
+    await newMerchant.save();
+  });
+
+  // Après mise à jour d'un marchand (Postgres) on met à jour le marchand correspondant (MongoDB)
+  Merchant.afterUpdate(async (merchant) => {
+    await MerchantMongo.findOneAndUpdate(
+      { merchantId: merchant.id },
+      {
+        companyName: merchant.companyName,
+        firstName: merchant.contactFirstName,
+        lastName: merchant.contactLastName,
+        email: merchant.contactEmail,
+        phone: merchant.contactPhone,
+        approved: merchant.approved,
+      },
+    );
+  });
+
+  // Après suppression d'un marchand (Postgres) on supprime le marchand correspondant (MongoDB)
+  Merchant.afterDestroy(async (merchant) => {
+    await MerchantMongo.findOneAndDelete({ merchantId: merchant.id });
   });
 
   async function encryptPassword(user, options) {
