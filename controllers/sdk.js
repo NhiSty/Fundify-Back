@@ -13,6 +13,7 @@ exports.sendForm = async (req, res) => {
       userId: transaction.userId,
       merchantId: transaction.merchantId,
       currency: transaction.currency,
+      transactionId: transaction.id,
     });
   } catch (err) {
     console.error(err);
