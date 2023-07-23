@@ -16,7 +16,7 @@ fs.readdirSync(path.join(__dirname, 'models')).forEach((file) => {
   const model = require(path.join(__dirname, 'models', file))(connection, Sequelize.DataTypes);
   db[model.name] = model;
   // eslint-disable-next-line no-console
-  console.log(model.name, model.prototype.constructor.name);
+  // console.log(model.name, model.prototype.constructor.name);
 });
 
 module.exports = db;
