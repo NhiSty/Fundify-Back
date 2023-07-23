@@ -2,33 +2,32 @@ const mongoose = require('mongoose');
 
 const transactionSchema = new mongoose.Schema({
   transactionId: {
-    types: Number,
+    type: Number,
     required: true,
     unique: true,
   },
   merchantId: {
-    types: Number,
+    type: Number,
     required: true,
   },
   userId: {
-    types: Number,
+    type: Number,
     required: true,
   },
   amount: {
-    types: Number,
+    type: Number,
     required: true,
   },
   currency: {
-    types: String,
+    type: String,
     required: true,
   },
   status: {
-    types: String,
+    type: String,
     enum: ['PENDING', 'CONFIRMED', 'CANCELLED'],
     default: 'PENDING',
   },
 });
-
 const Transaction = mongoose.model('Transaction', transactionSchema);
 
 module.exports = Transaction;

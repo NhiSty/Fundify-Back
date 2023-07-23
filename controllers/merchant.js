@@ -63,7 +63,7 @@ exports.login = async (req, res) => {
       'token',
       sign,
       { httpOnly: false, secure: false },
-    ).status(200).json({ token: sign });
+    ).status(200).json();
   } catch (e) {
     // eslint-disable-next-line no-console
     console.log(e);
