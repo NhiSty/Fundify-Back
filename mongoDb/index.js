@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
+require('dotenv').config();
 
 // URL de connexion à notre base de données MongoDB
 const uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_CLUSTER}/${process.env.MONGO_DB_NAME}`;
 
 // Connexion à la base de données MongoDB
-mongoose.connect('mongodb+srv://whisky:thomas78@cluster0.wdnkq.mongodb.net/fundify', {
+mongoose.connect(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
