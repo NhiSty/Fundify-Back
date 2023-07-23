@@ -153,3 +153,15 @@ describe('User API Tests -- Login', () => {
     expect(response.body).toEqual('');
   });
 });
+describe('User API Tests -- Logout', () => {
+  test('Logout - Successful', async () => {
+    const response = await request(app)
+      .get('/api/auth/logout');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual('');
+    expect(response.headers['set-cookie']).toEqual(
+      expect.arrayContaining(['token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT']),
+    );
+  });
+});

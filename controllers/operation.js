@@ -1,20 +1,20 @@
 const db = require('../db/index');
-
-const statusEnum = [
-  'TOTAL',
-  'PARTIAL',
-];
+const OperationValidator = require('../validator/OperationValidator');
 
 exports.createOperation = async (req, res) => {
   const { transactionId } = req.body;
 
-  if (req.body.type && statusEnum.includes(req.body.type) === false) {
-    return res.status(422).json();
-  }
-
   if (!transactionId) {
     return res.status(422).json();
   }
+
+  if (req.body.type && !OperationValidator.validateType(req.body.type)) {
+    return res.status(422).json();
+  }
+  if (!OperationValidator.validateAmount(req.body.amount)) {
+    return res.status(422).json();
+  }
+
   const transaction = await db.Transaction.findByPk(transactionId);
 
   if (!transaction) {
@@ -59,7 +59,10 @@ exports.getTransactionOperations = async (req, res) => {
 exports.updateOperation = async (req, res) => {
   const operationId = req.body.id;
 
-  if (req.body.type && statusEnum.includes(req.body.type) === false) {
+  if (req.body.type && !OperationValidator.validateType(req.body.type)) {
+    return res.status(422).json();
+  }
+  if (req.body.amount && !OperationValidator.validateAmount(req.body.amount)) {
     return res.status(422).json();
   }
 

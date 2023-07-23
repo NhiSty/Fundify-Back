@@ -179,3 +179,42 @@ describe('Merchant currency validator', () => {
     expect(MerchantValidator.validateCurrency('EURO')).toBe(false);
   });
 });
+describe('Merchant kbis validator', () => {
+  const kbis = Buffer.from('valid kbis');
+
+  it('valid kbis should return true', () => {
+    expect(MerchantValidator.validateKbis(kbis)).toBe(true);
+  });
+  it('empty kbis should return false', () => {
+    expect(MerchantValidator.validateKbis('')).toBe(false);
+  });
+  it('null kbis should return false', () => {
+    expect(MerchantValidator.validateKbis(null)).toBe(false);
+  });
+  it('undefined kbis should return false', () => {
+    expect(MerchantValidator.validateKbis(undefined)).toBe(false);
+  });
+  it('number kbis should return false', () => {
+    expect(MerchantValidator.validateKbis(1234)).toBe(false);
+  });
+  it('incorrect kbis should return false', () => {
+    expect(MerchantValidator.validateKbis('invalide kbis')).toBe(false);
+  });
+});
+describe('Merchant is approved validator', () => {
+  it('Merchant is approved should return true', () => {
+    expect(MerchantValidator.validateApprovation(true)).toBe(true);
+  });
+  it('empty value for approved should return false', () => {
+    expect(MerchantValidator.validateApprovation('')).toBe(false);
+  });
+  it('null value for approved should return false', () => {
+    expect(MerchantValidator.validateApprovation(null)).toBe(false);
+  });
+  it('undefined value for approved should return false', () => {
+    expect(MerchantValidator.validateApprovation(undefined)).toBe(false);
+  });
+  it('incorrect value for approved should return false', () => {
+    expect(MerchantValidator.validateApprovation('invalide data')).toBe(false);
+  });
+});

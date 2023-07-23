@@ -23,4 +23,10 @@ module.exports = {
     }
     return true;
   },
+  validateIsAdmin: (isAdmin) => {
+    if (isAdmin === null || isAdmin === undefined || isAdmin === '') {
+      return false;
+    }
+    return true;
+  },
 };

@@ -77,3 +77,21 @@ describe('User firstName validator', () => {
     expect(UserValidator.validateFirstname(1)).toBe(false);
   });
 });
+
+describe('User isAdmin validator', () => {
+  it('user is admin valid boolean should return true', () => {
+    expect(UserValidator.validateIsAdmin(true)).toBe(true);
+  });
+  it('user is not admin valid boolean should return true', () => {
+    expect(UserValidator.validateIsAdmin(false)).toBe(true);
+  });
+  it('empty isAdmin should return false', () => {
+    expect(UserValidator.validateIsAdmin('')).toBe(false);
+  });
+  it('null isAdmin should return false', () => {
+    expect(UserValidator.validateIsAdmin(null)).toBe(false);
+  });
+  it('undefined isAdmin should return false', () => {
+    expect(UserValidator.validateIsAdmin(undefined)).toBe(false);
+  });
+});
