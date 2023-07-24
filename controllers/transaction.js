@@ -1,4 +1,10 @@
 const db = require('../db/index');
+
+const statusEnum = [
+  'PENDING',
+  'CONFIRMED',
+  'CANCELLED',
+];
 const TransactionValidator = require('../validator/TransactionValidator');
 
 exports.createTransaction = async (req, res) => {
