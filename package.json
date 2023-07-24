@@ -25,7 +25,8 @@
     "dev": "nodemon -L server.js",
     "test": "jest --coverage",
     "doc": "jsdoc .",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "migrate": "node migrate.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.0",

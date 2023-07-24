@@ -35,10 +35,11 @@ exports.getMerchants = async (req, res) => {
 
   const results = merchants.map((merchant) => {
     const {
-      contactEmail, contactLastName, contactFirstName, companyName, contactPhone, currency,
+      approved, contactEmail, contactLastName, contactFirstName, companyName, contactPhone, currency,
       confirmationRedirectUrl, cancellationRedirectUrl,
     } = merchant.dataValues;
     return {
+      approved,
       contactEmail,
       contactLastName,
       contactFirstName,

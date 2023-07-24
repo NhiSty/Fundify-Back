@@ -29,6 +29,7 @@ services:
       - --config.file=/etc/prometheus/prometheus.yml
 
   database:
+    container_name: database
     image: postgres:13-alpine
     environment:
       POSTGRES_DB: app
@@ -38,6 +39,7 @@ services:
       - db_data:/var/lib/postgresql/data:rw
 
   adminer:
+    container_name: adminer
     image: adminer
     restart: always
     depends_on:
