@@ -1,16 +1,20 @@
 const db = require('../db/index');
-const statusEnum = [
-  'PENDING',
-  'CONFIRMED',
-  'CANCELLED',
-];
+const TransactionValidator = require('../validator/TransactionValidator');
+
 exports.createTransaction = async (req, res) => {
   const { merchantId } = req.body;
   if (!merchantId) {
     return res.status(422).json();
   }
 
-  if (req.body.status && statusEnum.includes(req.body.status) === false) {
+  if (req.body.status && !TransactionValidator.validateStatus(req.body.status)) {
+    return res.status(422).json();
+  }
+  if (!TransactionValidator.validateAmount(req.body.amount)) {
+    return res.status(422).json();
+  }
+
+  if (!TransactionValidator.validateCurrency(req.body.currency)) {
     return res.status(422).json();
   }
   const merchant = await db.Merchant.findByPk(merchantId);
@@ -61,9 +65,16 @@ exports.updateTransaction = async (req, res) => {
   if (!transactionId) {
     return res.status(422).json();
   }
-  if (req.body.status && statusEnum.includes(req.body.status) === false) {
+  if (req.body.status && !TransactionValidator.validateStatus(req.body.status)) {
     return res.status(422).json();
   }
+  if (req.body.amount && !TransactionValidator.validateAmount(req.body.amount)) {
+    return res.status(422).json();
+  }
+  if (req.body.currency && !TransactionValidator.validateCurrency(req.body.currency)) {
+    return res.status(422).json();
+  }
+
   const transactionToUpdate = await db.Transaction.findOne({ where: { id: transactionId } });
   if (!transactionToUpdate) {
     return res.status(404).json();

@@ -53,4 +53,16 @@ module.exports = {
     }
     return /^[A-Z]{3}$/.test(currency);
   },
+  validateKbis: (kbis) => {
+    if (!kbis || kbis === '' || !(kbis instanceof Buffer)) {
+      return false;
+    }
+    return true;
+  },
+  validateApprovation: (approved) => {
+    if (!approved || approved === '' || typeof (approved) !== 'boolean') {
+      return false;
+    }
+    return true;
+  },
 };
