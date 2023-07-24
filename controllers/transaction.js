@@ -13,9 +13,10 @@ exports.createTransaction = async (req, res) => {
     return res.status(422).json();
   }
 
-  if (req.body.status && !TransactionValidator.validateStatus(req.body.status)) {
+  if (req.body.status && statusEnum.includes(req.body.status) === false) {
     return res.status(422).json();
   }
+
   if (!TransactionValidator.validateAmount(req.body.amount)) {
     return res.status(422).json();
   }
@@ -30,19 +31,6 @@ exports.createTransaction = async (req, res) => {
   }
 
   const transaction = await db.Transaction.create(req.body);
-
-  // Demande de vérification de la transaction au PSP
-  await fetch('http://psp:1338/api/psp/transactions/verifications', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      id: transaction.id,
-      amount: transaction.amount,
-      currency: transaction.currency,
-    }),
-  });
 
   return res.status(201).json(transaction);
 };
@@ -85,7 +73,7 @@ exports.updateTransaction = async (req, res) => {
   if (!transactionId) {
     return res.status(422).json();
   }
-  if (req.body.status && !TransactionValidator.validateStatus(req.body.status)) {
+  if (req.body.status && statusEnum.includes(req.body.status) === false) {
     return res.status(422).json();
   }
   if (req.body.amount && !TransactionValidator.validateAmount(req.body.amount)) {
