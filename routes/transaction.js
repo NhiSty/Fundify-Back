@@ -8,6 +8,8 @@ const transactionCtrl = require('../controllers/transaction');
 
 router.post('/transaction/create', transactionCtrl.createTransaction);
 
+router.post('/transaction/:id/confirm', transactionCtrl.confirmTransaction);
+
 router.get('/transaction/:id', transactionCtrl.getTransaction);
 
 router.get('/transactions/merchant/:id', transactionCtrl.getMerchantTransactions);
