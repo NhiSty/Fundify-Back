@@ -15,8 +15,12 @@ const merchantRoutes = require('./routes/merchant');
 const transactionRoutes = require('./routes/transaction');
 const operationRoutes = require('./routes/operation');
 const adminRoutes = require('./routes/admin');
+const sdkRoutes = require('./routes/sdk');
+
+app.set('view engine', 'ejs');
 
 app.use(bodyParser.json({ limit: '5mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
 app.use(cors(
   {
     origin: 'http://localhost:3000',
@@ -33,6 +37,7 @@ app.use((req, res, next) => {
   next();
 });
 app.use(errorHandler);
+app.use('/api/', sdkRoutes);
 app.use('/api/auth', userRoutes.signup);
 app.use('/api/auth', userRoutes.login);
 app.use('/api/auth', userRoutes.logout);

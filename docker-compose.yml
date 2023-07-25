@@ -12,6 +12,22 @@ services:
     tty: true
     stdin_open: true
     command: sh -c "yarn && yarn dev"
+    networks:
+      - my_network
+
+  psp:
+    container_name: psp
+    image: node:18-alpine
+    working_dir: /var/www/html/app/
+    user: node
+    volumes:
+      - ./pspServer:/var/www/html/app/
+    ports:
+      - 1338:1338
+    tty: true
+    command: sh -c "yarn && yarn dev"
+    networks:
+      - my_network
 
   mailhog:
     container_name: mailhog
@@ -52,4 +68,8 @@ services:
       POSTGRES_DB: app
 
 volumes:
-    db_data:
+  db_data:
+
+networks:
+  my_network:
+    driver: bridge
