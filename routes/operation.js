@@ -1,8 +1,6 @@
 const express = require('express');
-const operationMiddleware = require('../middleware/operation');
 
 const router = express.Router();
-router.use(operationMiddleware);
 
 const operationCtrl = require('../controllers/operation');
 
