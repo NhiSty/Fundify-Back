@@ -1117,7 +1117,7 @@ __metadata:
     jest: ^29.5.0
     jsdoc: ^4.0.2
     jsonwebtoken: ^9.0.0
-    mongoose: ^7.2.1
+    mongoose: ^7.3.3
     mongoose-unique-validator: ^4.0.0
     morgan: ^1.10.0
     multer: ^1.4.5-lts.1

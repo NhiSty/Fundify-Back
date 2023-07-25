@@ -30,15 +30,32 @@ exports.invalidateMarchant = async (req, res) => {
   });
 };
 
+exports.rejectMarchant = async (req, res) => {
+  const merchantId = req.body.id;
+  if (!merchantId) {
+    return res.status(422).json();
+  }
+  const removeTransactions = await db.Transaction.destroy({ where: { merchantId: merchantId } });
+  const rejectedMerchant = await db.Merchant.destroy({ where: { id: merchantId } });
+
+
+  if (rejectedMerchant.length < 0) {
+    return res.status(404).json();
+  }
+
+  return res.status(200).json();
+};
+
 exports.getMerchants = async (req, res) => {
   const merchants = await db.Merchant.findAll();
 
   const results = merchants.map((merchant) => {
     const {
-      contactEmail, contactLastName, contactFirstName, companyName, contactPhone, currency,
-      confirmationRedirectUrl, cancellationRedirectUrl,
+      approved, contactEmail, contactLastName, contactFirstName, companyName, contactPhone, currency,
+      confirmationRedirectUrl, cancellationRedirectUrl, id,
     } = merchant.dataValues;
     return {
+      approved,
       contactEmail,
       contactLastName,
       contactFirstName,
@@ -47,6 +64,7 @@ exports.getMerchants = async (req, res) => {
       currency,
       confirmationRedirectUrl,
       cancellationRedirectUrl,
+      id,
     };
   });
   return res.status(200).json({
