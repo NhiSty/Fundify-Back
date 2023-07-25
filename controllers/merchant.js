@@ -1,5 +1,6 @@
 const db = require('../db/index');
 const validator = require('../validator/MerchantValidator');
+const idItsMe = require('../utils/idItsMe');
 
 exports.signup = async (req, res) => {
   if (!validator.validateEmail(req.body.contactEmail)
@@ -78,6 +79,10 @@ exports.getMerchantTransactions = async (req, res) => {
     return res.status(422).json();
   }
 
+  if (idItsMe(req, merchantId)) {
+    return res.status(403).json();
+  }
+
   const merchant = await db.Merchant.findByPk(merchantId);
   if (!merchant) {
     return res.status(404).json();
@@ -97,13 +102,17 @@ exports.getMerchantAccount = async (req, res) => {
     if (!merchantId) {
       return res.status(422).json();
     }
-    console.log(merchantId);
+
+    if (idItsMe(req, merchantId)) {
+      return res.status(403).json();
+    }
 
     const merchant = await db.Merchant.findOne({ where: { id: merchantId } });
-    console.log(merchant);
+
     if (!merchant) {
       return res.status(404).json();
     }
+
     return res.status(200).json({
       contactEmail: merchant.contactEmail,
       contactLastName: merchant.contactLastName,

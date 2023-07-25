@@ -49,7 +49,7 @@ app.use('/api', merchantRoutes.getMerchantTransactions);
 app.use('/api', merchantRoutes.getMerchantAccount);
 
 app.use('/api', transactionRoutes.getTransaction);
-app.use('/api', transactionRoutes.getMerchantTransactions);
+// app.use('/api', transactionRoutes.getMerchantTransactions);
 app.use('/api', transactionRoutes.deleteTransaction);
 app.use('/api', transactionRoutes.updateTransaction);
 app.use('/api', operationRoutes.updateOperation);
