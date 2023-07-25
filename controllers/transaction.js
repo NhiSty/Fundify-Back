@@ -92,9 +92,18 @@ exports.deleteTransaction = async (req, res) => {
   if (!transactionId) {
     return res.status(422).json();
   }
-  const deletedTransaction = await db.Transaction.destroy({ where: { id: transactionId } });
 
-  if (!deletedTransaction) {
+  const transactionToArchive = await db.Transaction.findOne({ where: { id: transactionId } });
+  if (!transactionToArchive) {
+    return res.status(404).json();
+  }
+
+  const archivedTransaction = await db.Transaction.update(
+    { status: 'cancelled', deletedAt: Date.now() },
+    { where: { id: transactionId } },
+  );
+
+  if (!archivedTransaction) {
     return res.status(404).json();
   }
   return res.status(204).send();

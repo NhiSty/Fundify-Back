@@ -1,6 +1,6 @@
 module.exports = {
   validateType: (type) => {
-    const validTypeValues = ['TOTAL', 'PARTIAL'];
+    const validTypeValues = ['captured', 'refunded'];
     return validTypeValues.includes(type);
   },
   validateAmount: (amount) => {
@@ -8,5 +8,9 @@ module.exports = {
       return false;
     }
     return /^(\d{1,8})(\.\d{1,2})?$/.test(amount);
+  },
+  validateStatus: (status) => {
+    const validStatusValues = ['created', 'processing', 'done', 'failed'];
+    return validStatusValues.includes(status);
   },
 };

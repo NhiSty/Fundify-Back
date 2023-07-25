@@ -6,7 +6,8 @@ const app = express();
 const bodyParser = require('body-parser');
 const path = require('path');
 const errorHandler = require('./middleware/errorHandler');
-const authMiddleware = require('./middleware/auth');
+const userAuthMiddleware = require('./middleware/userAuthMiddleware');
+const merchantAuthMiddleware = require('./middleware/merchantAuthMiddleware');
 const adminMiddleware = require('./middleware/admin');
 const userRoutes = require('./routes/user');
 const merchantRoutes = require('./routes/merchant');
@@ -39,12 +40,22 @@ app.use('/api/auth/merchant', merchantRoutes.signup);
 app.use('/api/auth/merchant', merchantRoutes.login);
 
 // apres ce middleware, toutes les routes sont protegees par une authentification
-app.use(authMiddleware);
+app.use(userAuthMiddleware);
+app.use('/api', operationRoutes.createCaptureOperation);
+app.use('/api', transactionRoutes.createTransaction);
+
+app.use(merchantAuthMiddleware);
 app.use('/api', merchantRoutes.getMerchantTransactions);
 app.use('/api', merchantRoutes.getMerchantAccount);
 
-app.use('/api', transactionRoutes);
-app.use('/api', operationRoutes);
+app.use('/api', transactionRoutes.getTransaction);
+app.use('/api', transactionRoutes.getMerchantTransactions);
+app.use('/api', transactionRoutes.deleteTransaction);
+app.use('/api', transactionRoutes.updateTransaction);
+app.use('/api', operationRoutes.updateOperation);
+app.use('/api', operationRoutes.deleteOperation);
+app.use('/api', operationRoutes.getOperation);
+app.use('/api', operationRoutes.getTransactionOperations);
 
 // apres ce middleware, toutes les routes sont protegees par une authentification et une autorisation admin
 app.use(adminMiddleware);

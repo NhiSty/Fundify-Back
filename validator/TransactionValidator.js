@@ -6,7 +6,7 @@ module.exports = {
     return /^(\d{1,8})(\.\d{1,2})?$/.test(amount);
   },
   validateStatus: (status) => {
-    const validStatusValues = ['PENDING', 'CONFIRMED', 'CANCELLED'];
+    const validStatusValues = ['created', 'captured', 'waiting_refunded', 'partial_refunded', 'refunded', 'cancelled'];
     return validStatusValues.includes(status);
   },
   validateCurrency: (currency) => {

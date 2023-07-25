@@ -1,17 +1,17 @@
 const db = require('../db/index');
 const OperationValidator = require('../validator/OperationValidator');
 
-exports.createOperation = async (req, res) => {
+exports.createOperationCapture = async (req, res) => {
   const { transactionId } = req.body;
 
   if (!transactionId) {
     return res.status(422).json();
   }
 
-  if (req.body.type && !OperationValidator.validateType(req.body.type)) {
+  if (!OperationValidator.validateAmount(req.body.amount)) {
     return res.status(422).json();
   }
-  if (!OperationValidator.validateAmount(req.body.amount)) {
+  if (req.body.status && !OperationValidator.validateStatus(req.body.status)) {
     return res.status(422).json();
   }
 
@@ -21,7 +21,41 @@ exports.createOperation = async (req, res) => {
     return res.status(404).json();
   }
 
-  const operation = await db.Operation.create(req.body);
+  const { type, ...restBody } = req.body;
+
+  const operation = await db.Operation.create({
+    type: 'captured',
+    ...restBody,
+  });
+  return res.status(201).json(operation);
+};
+
+exports.createOperationRefund = async (req, res) => {
+  const { transactionId } = req.body;
+
+  if (!transactionId) {
+    return res.status(422).json();
+  }
+
+  if (!OperationValidator.validateAmount(req.body.amount)) {
+    return res.status(422).json();
+  }
+  if (req.body.status && !OperationValidator.validateStatus(req.body.status)) {
+    return res.status(422).json();
+  }
+
+  const transaction = await db.Transaction.findByPk(transactionId);
+
+  if (!transaction) {
+    return res.status(404).json();
+  }
+
+  const { type, ...restBody } = req.body;
+
+  const operation = await db.Operation.create({
+    type: 'refunded',
+    ...restBody,
+  });
   return res.status(201).json(operation);
 };
 
@@ -65,6 +99,9 @@ exports.updateOperation = async (req, res) => {
   if (req.body.amount && !OperationValidator.validateAmount(req.body.amount)) {
     return res.status(422).json();
   }
+  if (req.body.status && !OperationValidator.validateStatus(req.body.status)) {
+    return res.status(422).json();
+  }
 
   if (!operationId) {
     return res.status(422).json();
@@ -87,9 +124,21 @@ exports.deleteOperation = async (req, res) => {
   if (!operationId) {
     return res.status(422).json();
   }
-  const deletedOperation = await db.Operation.destroy({ where: { id: operationId } });
 
-  if (!deletedOperation) {
+  const operationToArchive = await db.Operation.findOne({ where: { id: operationId } });
+  if (!operationToArchive) {
+    return res.status(404).json();
+  }
+
+  const archivedOperation = await db.Operation.update(
+    {
+      status: 'cancelled',
+      deletedAt: Date.now(),
+    },
+    { where: { id: operationId } },
+  );
+
+  if (!archivedOperation) {
     return res.status(404).json();
   }
   return res.status(204).send();

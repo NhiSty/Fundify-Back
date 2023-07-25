@@ -6,14 +6,11 @@ router.use(operationMiddleware);
 
 const operationCtrl = require('../controllers/operation');
 
-router.post('/operation/create', operationCtrl.createOperation);
-
-router.get('/operation/:id', operationCtrl.getOperation);
-
-router.get('/operations/transaction/:id', operationCtrl.getTransactionOperations);
-
-router.put('/operation/update', operationCtrl.updateOperation);
-
-router.delete('/operation/:id', operationCtrl.deleteOperation);
-
-module.exports = router;
+module.exports = {
+  createCaptureOperation: router.post('/operation/capture/create', operationCtrl.createOperationCapture),
+  createRefundOperation: router.post('/operation/refund/create', operationCtrl.createOperationRefund),
+  getOperation: router.get('/operation/:id', operationCtrl.getOperation),
+  getTransactionOperations: router.get('/operations/transaction/:id', operationCtrl.getTransactionOperations),
+  updateOperation: router.put('/operation/update', operationCtrl.updateOperation),
+  deleteOperation: router.delete('/operation/:id', operationCtrl.deleteOperation),
+};

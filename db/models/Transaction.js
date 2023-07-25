@@ -1,6 +1,7 @@
 const { Model, DataTypes } = require('sequelize');
+const TransactionStatusHist = require('./TransactionStatusHist');
 
-module.exports = function (connection) {
+module.exports = (connection) => {
   class Transaction extends Model {}
 
   Transaction.init(
@@ -30,8 +31,12 @@ module.exports = function (connection) {
         allowNull: false,
       },
       status: {
-        type: DataTypes.ENUM('PENDING', 'CONFIRMED', 'CANCELLED'),
-        defaultValue: 'PENDING',
+        type: DataTypes.ENUM('created', 'captured', 'waiting_refunded', 'partial_refunded', 'refunded', 'cancelled'),
+        defaultValue: 'created',
+      },
+      deletedAt: {
+        type: DataTypes.DATE,
+        allowNull: true,
       },
     },
     {
@@ -40,6 +45,20 @@ module.exports = function (connection) {
       timestamps: true,
     },
   );
+
+  Transaction.afterCreate(async (transaction) => {
+    await TransactionStatusHist(connection).create({
+      transactionId: transaction.id,
+      status: transaction.status,
+    });
+  });
+
+  Transaction.afterUpdate(async (transaction) => {
+    await TransactionStatusHist(connection).create({
+      transactionId: transaction.id,
+      status: transaction.status,
+    });
+  });
 
   return Transaction;
 };
