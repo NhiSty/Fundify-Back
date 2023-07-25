@@ -12,7 +12,8 @@ exports.signup = async (req, res) => {
     || !validator.validateFirstname(req.body.contactFirstName)
     || !validator.validateLastname(req.body.contactLastName)
     || !validator.validateSociety(req.body.companyName)) {
-    return res.status(422).json();
+    return res.status(422)
+      .json();
   }
 
   try {
@@ -31,31 +32,37 @@ exports.signup = async (req, res) => {
       cancellationRedirectUrl: req.body.cancellationRedirectUrl,
     });
     if (merchandCreated) {
-      return res.status(201).json({
-        contactEmail: merchandCreated.contactEmail,
-      });
+      return res.status(201)
+        .json({
+          contactEmail: merchandCreated.contactEmail,
+        });
     }
   } catch (e) {
     console.log(e);
-    return res.status(409).json();
+    return res.status(409)
+      .json();
   }
-  return res.status(500).json();
+  return res.status(500)
+    .json();
 };
 
 exports.login = async (req, res) => {
   if (!validator.validateEmail(req.body.contactEmail) || !validator.validatePassword(req.body.password)) {
-    return res.status(422).json();
+    return res.status(422)
+      .json();
   }
 
   try {
     const merchand = await db.Merchant.findOne({ where: { contactEmail: req.body.contactEmail } });
     if (!merchand) {
-      return res.status(404).json();
+      return res.status(404)
+        .json();
     }
     const valid = await merchand.checkPassword(req.body.password);
 
     if (!valid) {
-      return res.status(401).json();
+      return res.status(401)
+        .json();
     }
 
     const sign = merchand.generateToken();
@@ -63,36 +70,46 @@ exports.login = async (req, res) => {
     return res.cookie(
       'token',
       sign,
-      { httpOnly: false, secure: false },
-    ).status(200).json();
+      {
+        httpOnly: false,
+        secure: false,
+      },
+    )
+      .status(200)
+      .json();
   } catch (e) {
     // eslint-disable-next-line no-console
     console.log(e);
   }
-  return res.status(500).json();
+  return res.status(500)
+    .json();
 };
 
 exports.getMerchantTransactions = async (req, res) => {
   const merchantId = req.params.id;
 
   if (!merchantId) {
-    return res.status(422).json();
+    return res.status(422)
+      .json();
   }
 
   if (idItsMe(req, merchantId)) {
-    return res.status(403).json();
+    return res.status(403)
+      .json();
   }
 
   const merchant = await db.Merchant.findByPk(merchantId);
   if (!merchant) {
-    return res.status(404).json();
+    return res.status(404)
+      .json();
   }
 
   const transactions = await db.Transaction.findAll({
     where: { merchantId },
   });
 
-  return res.status(200).json(transactions);
+  return res.status(200)
+    .json(transactions);
 };
 
 exports.getMerchantAccount = async (req, res) => {
@@ -100,32 +117,49 @@ exports.getMerchantAccount = async (req, res) => {
 
   try {
     if (!merchantId) {
-      return res.status(422).json();
+      return res.status(422)
+        .json();
     }
 
     if (idItsMe(req, merchantId)) {
-      return res.status(403).json();
+      return res.status(403)
+        .json();
     }
 
     const merchant = await db.Merchant.findOne({ where: { id: merchantId } });
 
     if (!merchant) {
-      return res.status(404).json();
+      return res.status(404)
+        .json();
     }
 
-    return res.status(200).json({
-      contactEmail: merchant.contactEmail,
-      contactLastName: merchant.contactLastName,
-      contactFirstName: merchant.contactFirstName,
-      companyName: merchant.companyName,
-      contactPhone: merchant.contactPhone,
-      currency: merchant.currency,
-      confirmationRedirectUrl: merchant.confirmationRedirectUrl,
-      cancellationRedirectUrl: merchant.cancellationRedirectUrl,
-      kbis: merchant.kbis,
-    });
+    return res.status(200)
+      .json({
+        contactEmail: merchant.contactEmail,
+        contactLastName: merchant.contactLastName,
+        contactFirstName: merchant.contactFirstName,
+        companyName: merchant.companyName,
+        contactPhone: merchant.contactPhone,
+        currency: merchant.currency,
+        confirmationRedirectUrl: merchant.confirmationRedirectUrl,
+        cancellationRedirectUrl: merchant.cancellationRedirectUrl,
+        kbis: merchant.kbis,
+      });
   } catch (e) {
     console.log(e);
-    return res.status(500).json();
+    return res.status(500)
+      .json();
   }
+};
+
+exports.updateMerchant = async (req, res) => {
+
+  if (admin) {
+    merchantToUpdate.update(req.body, { where: { id } });
+  }
+
+  req.body.approved = merchantToUpdate.approved;
+  merchantToUpdate.update(req.body, { where: { id } });
+
+  return res.status(200);
 };

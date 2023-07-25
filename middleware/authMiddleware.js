@@ -1,17 +1,20 @@
 const jsonwebtoken = require('jsonwebtoken');
 
-module.exports = (req, res, next) => {
+module.exports = async (req, res, next) => {
   try {
     const token = req.headers.cookie.split('token=')[1];
     const decodedToken = jsonwebtoken.verify(token, `${process.env.JWT_SECRET}`);
-    const { id } = decodedToken;
+    const {
+      approved,
+      isAdmin,
+    } = decodedToken;
 
-    if (!id) {
-      throw new Error('Invalid ID');
+    if (!approved || !isAdmin) {
+      throw new Error('You are not allowed to access this ressource');
     }
     next();
   } catch (error) {
-    // Display error message
+    next(error);
     res.status(401).json();
   }
 };

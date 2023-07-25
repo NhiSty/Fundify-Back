@@ -2,7 +2,7 @@ const { Model, DataTypes } = require('sequelize');
 
 // eslint-disable-next-line func-names
 module.exports = function (connection) {
-  class User extends Model {
+  class Admin extends Model {
     async checkPassword(password) {
       // eslint-disable-next-line global-require
       const bcrypt = require('bcrypt');
@@ -18,7 +18,7 @@ module.exports = function (connection) {
     }
   }
 
-  User.init(
+  Admin.init(
     {
       lastname: DataTypes.STRING,
       firstname: DataTypes.STRING,
@@ -49,7 +49,7 @@ module.exports = function (connection) {
     },
     {
       sequelize: connection,
-      modelName: 'User',
+      modelName: 'Admin',
     },
   );
 
@@ -65,8 +65,8 @@ module.exports = function (connection) {
     user.password = hash;
   }
 
-  User.addHook('beforeCreate', encryptPassword);
-  User.addHook('beforeUpdate', encryptPassword);
+  Admin.addHook('beforeCreate', encryptPassword);
+  Admin.addHook('beforeUpdate', encryptPassword);
 
-  return User;
+  return Admin;
 };

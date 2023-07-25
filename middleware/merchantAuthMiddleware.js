@@ -1,24 +1,48 @@
-const jsonwebtoken = require('jsonwebtoken');
+const db = require('../db');
+const idItsMe = require('../utils/idItsMe');
+const token = require('token');
 
+// eslint-disable-next-line consistent-return
 module.exports = async (req, res, next) => {
   try {
-    const token = req.headers.cookie.split('token=')[1];
-    const decodedToken = jsonwebtoken.verify(token, `${process.env.JWT_SECRET}`);
-    const { id, approved, isAdmin } = decodedToken;
+    const {
+      id,
+      adminId,
+      clientToken,
+    } = req;
 
-    console.log('id', id);
-    console.log('approved', approved);
-    console.log('isAdmin', isAdmin);
-
-    // eslint-disable-next-line no-mixed-operators
-    if (!id || approved === false || (isAdmin && isAdmin === false)) {
-      throw new Error('Invalid ID');
+    if (!id || !adminId) {
+      return res.status(422)
+        .json();
     }
-    return res.json({ message: 'toto' });
-    // next();
+
+    const merchant = await db.Merchant.findByPk(id);
+    const admin = await db.Admin.findByPk(adminId);
+
+    if (!merchant) {
+      return res.status(404)
+        .json();
+    }
+
+    if (!admin) {
+      return res.status(404)
+        .json();
+    }
+
+    if (!idItsMe(req, merchant.id)) {
+      return res.status(403)
+        .json();
+    }
+
+    if (merchant) {
+      const clientSecret = merchant.clientToken;
+
+
+    }
   } catch (error) {
-    console.log('error', error);
+    next(error);
     // Display error message
-    res.status(401).json();
+    res.status(401)
+      .json();
   }
 };
