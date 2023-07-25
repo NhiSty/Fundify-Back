@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 const express = require('express');
 const cors = require('cors');
+require('./mongoDb/index');
 
 const app = express();
 const bodyParser = require('body-parser');
@@ -19,6 +20,7 @@ app.set('view engine', 'ejs');
 
 app.use(bodyParser.json({ limit: '5mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
+
 app.use(cors(
   {
     origin: 'http://localhost:3000',

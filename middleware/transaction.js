@@ -1,6 +1,7 @@
 const jsonwebtoken = require('jsonwebtoken');
 
 module.exports = async (req, res, next) => {
+  console.log(req.headers);
   try {
     const token = req.headers.cookie.split('token=')[1];
     const decodedToken = jsonwebtoken.verify(token, `${process.env.JWT_SECRET}`);
