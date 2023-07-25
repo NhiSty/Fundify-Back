@@ -9,5 +9,5 @@ module.exports = {
   login: router.post('/login', merchantCtrl.login),
   getMerchantTransactions: router.get('/merchant/:id/transactions', merchantCtrl.getMerchantTransactions),
   getMerchantAccount: router.get('/merchant/:id/account', merchantCtrl.getMerchantAccount),
-  updateMerchantAccount: router.put('/merchant/:id/account/update', merchantCtrl.update),
+  updateMerchantAccount: router.put('/merchant/:id/account/update', merchantCtrl.updateMerchant),
 };

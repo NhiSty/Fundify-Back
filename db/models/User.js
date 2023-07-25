@@ -2,7 +2,7 @@ const { Model, DataTypes } = require('sequelize');
 
 // eslint-disable-next-line func-names
 module.exports = function (connection) {
-  class Admin extends Model {
+  class User extends Model {
     async checkPassword(password) {
       // eslint-disable-next-line global-require
       const bcrypt = require('bcrypt');
@@ -12,13 +12,13 @@ module.exports = function (connection) {
     generateToken() {
       // eslint-disable-next-line global-require
       const jwt = require('jsonwebtoken');
-      return jwt.sign({ id: this.id, isAdmin: this.isAdmin }, process.env.JWT_SECRET, {
+      return jwt.sign({ id: this.id, merchantId: this.merchantId }, process.env.JWT_SECRET, {
         expiresIn: '1y',
       });
     }
   }
 
-  Admin.init(
+  User.init(
     {
       lastname: DataTypes.STRING,
       firstname: DataTypes.STRING,
@@ -42,9 +42,12 @@ module.exports = function (connection) {
           min: 8,
         },
       },
-      isAdmin: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false,
+      merchantId: {
+        type: DataTypes.INTEGER,
+        references: {
+          model: 'Merchants',
+          key: 'id',
+        },
       },
     },
     {
@@ -65,8 +68,8 @@ module.exports = function (connection) {
     user.password = hash;
   }
 
-  Admin.addHook('beforeCreate', encryptPassword);
-  Admin.addHook('beforeUpdate', encryptPassword);
+  User.addHook('beforeCreate', encryptPassword);
+  User.addHook('beforeUpdate', encryptPassword);
 
-  return Admin;
+  return User;
 };

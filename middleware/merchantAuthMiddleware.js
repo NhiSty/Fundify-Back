@@ -1,44 +1,24 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
 const db = require('../db');
-const idItsMe = require('../utils/idItsMe');
-const token = require('token');
 
 // eslint-disable-next-line consistent-return
 module.exports = async (req, res, next) => {
+  const merchantId = req.body || req.params.id;
   try {
-    const {
-      id,
-      adminId,
-      clientToken,
-    } = req;
+    if (merchantId) {
+      const merchant = await db.Merchant.findByPk(merchantId);
+      if (!merchant) {
+        return res.sendStatus(404);
+      }
 
-    if (!id || !adminId) {
-      return res.status(422)
-        .json();
+      if (merchant.approved) {
+        next();
+      } else {
+        return res.sendStatus(403);
+      }
     }
 
-    const merchant = await db.Merchant.findByPk(id);
-    const admin = await db.Admin.findByPk(adminId);
-
-    if (!merchant) {
-      return res.status(404)
-        .json();
-    }
-
-    if (!admin) {
-      return res.status(404)
-        .json();
-    }
-
-    if (!idItsMe(req, merchant.id)) {
-      return res.status(403)
-        .json();
-    }
-
-    if (merchant) {
-      const clientSecret = merchant.clientToken;
-
-
-    }
+    next();
   } catch (error) {
     next(error);
     // Display error message

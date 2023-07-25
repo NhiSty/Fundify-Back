@@ -153,7 +153,6 @@ exports.getMerchantAccount = async (req, res) => {
 };
 
 exports.updateMerchant = async (req, res) => {
-
   if (admin) {
     merchantToUpdate.update(req.body, { where: { id } });
   }

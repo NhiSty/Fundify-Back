@@ -1,49 +1,31 @@
-const { Model, DataTypes } = require('sequelize');
+const {
+  Model,
+  DataTypes,
+} = require('sequelize');
 
 module.exports = function (connection) {
-  class Merchant extends Model {
-    async checkPassword(password) {
-      // eslint-disable-next-line global-require
-      const bcrypt = require('bcrypt');
-      return bcrypt.compare(password, this.password);
-    }
-
-    generateToken() {
-      // eslint-disable-next-line global-require
-      const jwt = require('jsonwebtoken');
-      return jwt.sign({ id: this.id, approved: this.approved }, process.env.JWT_SECRET, {
-        expiresIn: '1y',
-      });
-    }
-  }
-
+  class Merchant extends Model {}
   Merchant.init({
     companyName: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique: true,
     },
     kbis: {
       type: DataTypes.BLOB,
       allowNull: false,
     },
-    contactLastName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    contactFirstName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    contactEmail: {
+    email: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
     },
-    password: {
+    domain: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique: true,
     },
-    contactPhone: {
+    phone: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -59,38 +41,22 @@ module.exports = function (connection) {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    clientToken: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    clientSecret: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
     approved: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,
+    },
+    credentialsId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'Credentials',
+        key: 'id',
+      },
     },
   }, {
     sequelize: connection,
     modelName: 'Merchant',
     timestamps: true,
   });
-  async function encryptPassword(user, options) {
-    if (!options?.fields.includes('password')) {
-      return;
-    }
-    // eslint-disable-next-line global-require
-    const bcrypt = require('bcrypt');
-    const salt = await bcrypt.genSalt(10);
-    const hash = await bcrypt.hash(user.password, salt);
-    // eslint-disable-next-line no-param-reassign
-    user.password = hash;
-  }
-
-  Merchant.addHook('beforeCreate', encryptPassword);
-  Merchant.addHook('beforeUpdate', encryptPassword);
-
   return Merchant;
 };
