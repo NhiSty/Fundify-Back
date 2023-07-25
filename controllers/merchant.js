@@ -99,10 +99,8 @@ exports.getMerchantAccount = async (req, res) => {
     if (!merchantId) {
       return res.status(422).json();
     }
-    console.log(merchantId);
 
     const merchant = await db.Merchant.findOne({ where: { id: merchantId } });
-    console.log(merchant);
     if (!merchant) {
       return res.status(404).json();
     }
@@ -127,7 +125,7 @@ exports.getMerchantAccount = async (req, res) => {
 };
 
 exports.updateMerchantCredentials = async (req, res) => {
-  const merchantId = req.body.id;
+  const { merchantId } = req.body;
 
   const merchantToUpdate = await db.Merchant.findByPk(merchantId);
   if (!merchantToUpdate) {
@@ -146,5 +144,5 @@ exports.updateMerchantCredentials = async (req, res) => {
     return res.status(500).json();
   }
 
-  return res.status(200).json();
+  return res.status(200).json(merchantUpdated);
 };

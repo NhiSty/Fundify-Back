@@ -49,6 +49,7 @@ app.use('/api/auth/merchant', merchantRoutes.login);
 app.use(authMiddleware);
 app.use('/api', merchantRoutes.getMerchantTransactions);
 app.use('/api', merchantRoutes.getMerchantAccount);
+app.use('/api', merchantRoutes.updateMerchantCredentials);
 
 app.use('/api', transactionRoutes);
 app.use('/api', operationRoutes);
