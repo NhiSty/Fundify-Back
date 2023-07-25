@@ -19,7 +19,13 @@ app.set('view engine', 'ejs');
 
 app.use(bodyParser.json({ limit: '5mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
-app.use(cors());
+app.use(cors(
+  {
+    origin: 'http://localhost:3000',
+    credentials: true,
+  },
+));
+
 // eslint-disable-next-line consistent-return
 /* app.use((req, res, next) => {
   if (['POST', 'PUT', 'PATCH'].includes(req.method)) {

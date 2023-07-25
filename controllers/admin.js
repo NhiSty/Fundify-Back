@@ -1,3 +1,5 @@
+const rdmString = require('randomstring');
+const token = require('token');
 const db = require('../db/index');
 
 exports.validateMarchant = async (req, res) => {
@@ -5,7 +7,15 @@ exports.validateMarchant = async (req, res) => {
   if (!merchantId) {
     return res.status(422).json();
   }
-  const approvedMerchant = await db.Merchant.update({ approved: true }, { where: { id: merchantId } });
+
+  const secret = rdmString.generate();
+  token.defaults.secret = secret;
+
+  const approvedMerchant = await db.Merchant.update({
+    approved: true,
+    clientSecret: secret,
+    clientToken: token.generate(secret),
+  }, { where: { id: merchantId } });
 
   if (approvedMerchant.length < 0) {
     return res.status(404).json();

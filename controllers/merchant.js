@@ -1,3 +1,5 @@
+const rdmString = require('randomstring');
+const token = require('token');
 const db = require('../db/index');
 const validator = require('../validator/MerchantValidator');
 
@@ -114,9 +116,35 @@ exports.getMerchantAccount = async (req, res) => {
       confirmationRedirectUrl: merchant.confirmationRedirectUrl,
       cancellationRedirectUrl: merchant.cancellationRedirectUrl,
       kbis: merchant.kbis,
+      clientToken: merchant.clientToken,
+      clientSecret: merchant.clientSecret,
+
     });
   } catch (e) {
     console.log(e);
     return res.status(500).json();
   }
+};
+
+exports.updateMerchantCredentials = async (req, res) => {
+  const merchantId = req.body.id;
+
+  const merchantToUpdate = await db.Merchant.findByPk(merchantId);
+  if (!merchantToUpdate) {
+    return res.status(404).json();
+  }
+
+  const secret = rdmString.generate();
+  token.defaults.secret = secret;
+
+  const merchantUpdated = await merchantToUpdate.update({
+    clientSecret: secret,
+    clientToken: token.generate(secret),
+  });
+
+  if (!merchantUpdated) {
+    return res.status(500).json();
+  }
+
+  return res.status(200).json();
 };
