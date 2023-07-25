@@ -1136,10 +1136,12 @@ __metadata:
     nodemon: ^2.0.22
     pg: ^8.11.0
     pg-hstore: ^2.3.4
+    randomstring: ^1.3.0
     readme-md-generator: ^1.0.0
     rimraf: ^5.0.1
     sequelize: ^6.32.1
     supertest: ^6.3.3
+    token: ^0.1.0
   languageName: unknown
   linkType: soft
 
@@ -5718,6 +5720,24 @@ eslint-config-airbnb-base@latest:
   languageName: node
   linkType: hard
 
+"randombytes@npm:2.0.3":
+  version: 2.0.3
+  resolution: "randombytes@npm:2.0.3"
+  checksum: 13e1abd143404dd87024bf345fb1a446b2e2ee46d8e1a5a073e8370c9b1e58000d81a97d4327ba7089087213eb6d8c77fa67ab4e91aa00605126d634fcccb9d4
+  languageName: node
+  linkType: hard
+
+"randomstring@npm:^1.3.0":
+  version: 1.3.0
+  resolution: "randomstring@npm:1.3.0"
+  dependencies:
+    randombytes: 2.0.3
+  bin:
+    randomstring: bin/randomstring
+  checksum: ec89fd1337b197edea5a7f60686cc674170f6f0424cb8ac025f7acb043d906fdd30b4a3b21073d0c566efec4921be9e87749b41609954f6656c9d5f3278e2284
+  languageName: node
+  linkType: hard
+
 "range-parser@npm:~1.2.1":
   version: 1.2.1
   resolution: "range-parser@npm:1.2.1"
@@ -6607,6 +6627,13 @@ eslint-config-airbnb-base@latest:
   version: 1.0.1
   resolution: "toidentifier@npm:1.0.1"
   checksum: 952c29e2a85d7123239b5cfdd889a0dde47ab0497f0913d70588f19c53f7e0b5327c95f4651e413c74b785147f9637b17410ac8c846d5d4a20a5a33eb6dc3a45
+  languageName: node
+  linkType: hard
+
+"token@npm:^0.1.0":
+  version: 0.1.0
+  resolution: "token@npm:0.1.0"
+  checksum: a26159f4e553b9d48d7e223ca9b07a59022da3939af98e9d73b447d587c32662645c92a171bd910d005ef0e78e1c0129e8ff4666ddd298f7fb4b6fc24f8aec52
   languageName: node
   linkType: hard
 
