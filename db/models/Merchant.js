@@ -1,4 +1,5 @@
 const { Model, DataTypes } = require('sequelize');
+const MerchantMongo = require('../../mongoDb/models/Merchant');
 
 module.exports = function (connection) {
   class Merchant extends Model {
@@ -21,6 +22,7 @@ module.exports = function (connection) {
     companyName: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique: true,
     },
     kbis: {
       type: DataTypes.BLOB,
@@ -77,6 +79,42 @@ module.exports = function (connection) {
     modelName: 'Merchant',
     timestamps: true,
   });
+
+  // Après création d'un marchand (Postgres) on crée le marchand correspondant (MongoDB)
+  Merchant.afterCreate(async (merchant) => {
+    const newMerchant = new MerchantMongo({
+      merchantId: merchant.id,
+      companyName: merchant.companyName,
+      firstName: merchant.contactFirstName,
+      lastName: merchant.contactLastName,
+      email: merchant.contactEmail,
+      phone: merchant.contactPhone,
+      approved: merchant.approved,
+    });
+
+    await newMerchant.save();
+  });
+
+  // Après mise à jour d'un marchand (Postgres) on met à jour le marchand correspondant (MongoDB)
+  Merchant.afterUpdate(async (merchant) => {
+    await MerchantMongo.findOneAndUpdate(
+      { merchantId: merchant.id },
+      {
+        companyName: merchant.companyName,
+        firstName: merchant.contactFirstName,
+        lastName: merchant.contactLastName,
+        email: merchant.contactEmail,
+        phone: merchant.contactPhone,
+        approved: merchant.approved,
+      },
+    );
+  });
+
+  // Après suppression d'un marchand (Postgres) on supprime le marchand correspondant (MongoDB)
+  Merchant.afterDestroy(async (merchant) => {
+    await MerchantMongo.findOneAndDelete({ merchantId: merchant.id });
+  });
+
   async function encryptPassword(user, options) {
     if (!options?.fields.includes('password')) {
       return;
