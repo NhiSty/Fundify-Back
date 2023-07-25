@@ -4,9 +4,9 @@ module.exports = async (req, res, next) => {
   try {
     const token = req.headers.cookie.split('token=')[1];
     const decodedToken = jsonwebtoken.verify(token, `${process.env.JWT_SECRET}`);
-    const { id, isAdmin, approved } = decodedToken;
+    const { id, isAdmin } = decodedToken;
 
-    if (!id || approved === true || isAdmin === false) {
+    if (!id || isAdmin !== true) {
       throw new Error('Invalid ID and role');
     }
     next();

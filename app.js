@@ -31,7 +31,10 @@ app.use((req, res, next) => {
   }
   next();
 });
+
 app.use(errorHandler);
+
+// public routes accessible pour tous sans authentification
 app.use('/api/auth', userRoutes.signup);
 app.use('/api/auth', userRoutes.login);
 app.use('/api/auth', userRoutes.logout);
@@ -39,19 +42,21 @@ app.use('/api/auth', userRoutes.logout);
 app.use('/api/auth/merchant', merchantRoutes.signup);
 app.use('/api/auth/merchant', merchantRoutes.login);
 
-// apres ce middleware, toutes les routes sont protegees par une authentification
-app.use(userAuthMiddleware);
+// Les routes ci dessous sont protegees par une connexion
+// app.use(userAuthMiddleware);
 app.use('/api', operationRoutes.createCaptureOperation);
 app.use('/api', transactionRoutes.createTransaction);
 
 app.use(merchantAuthMiddleware);
+app.use('/api', transactionRoutes.getMerchantTransactions);
+app.use('/api', transactionRoutes.getTransaction);
+app.use('/api', transactionRoutes.deleteTransaction);
+app.use('/api', transactionRoutes.updateTransaction);
+
+/*
 app.use('/api', merchantRoutes.getMerchantTransactions);
 app.use('/api', merchantRoutes.getMerchantAccount);
 
-app.use('/api', transactionRoutes.getTransaction);
-// app.use('/api', transactionRoutes.getMerchantTransactions);
-app.use('/api', transactionRoutes.deleteTransaction);
-app.use('/api', transactionRoutes.updateTransaction);
 app.use('/api', operationRoutes.updateOperation);
 app.use('/api', operationRoutes.deleteOperation);
 app.use('/api', operationRoutes.getOperation);
@@ -60,8 +65,8 @@ app.use('/api', operationRoutes.getTransactionOperations);
 // apres ce middleware, toutes les routes sont protegees par une authentification et une autorisation admin
 app.use(adminMiddleware);
 app.use('/api', userRoutes.setAdmin);
-
 app.use('/api', adminRoutes);
+ */
 
 /*
 try {

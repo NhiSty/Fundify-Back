@@ -1,8 +1,15 @@
+const jsonwebtoken = require('jsonwebtoken');
 const db = require('../db/index');
 const TransactionValidator = require('../validator/TransactionValidator');
+const idItsMe = require('../utils/idItsMe');
 
 exports.createTransaction = async (req, res) => {
-  const { merchantId } = req.body;
+  const { merchantId, userId } = req.body;
+
+  if (idItsMe(req, userId)) {
+    return res.status(403).json();
+  }
+
   if (!merchantId) {
     return res.status(422).json();
   }
@@ -36,6 +43,15 @@ exports.getTransaction = async (req, res) => {
 
   const transaction = await db.Transaction.findOne({ where: { id: transactionId } });
 
+  const { merchantId, userId } = transaction;
+  if (idItsMe(req, merchantId)) {
+    return res.status(403).json();
+  }
+
+  if (idItsMe(req, userId)) {
+    return res.status(403).json();
+  }
+
   if (!transaction) {
     return res.status(404).json();
   }
@@ -45,6 +61,10 @@ exports.getTransaction = async (req, res) => {
 
 exports.getMerchantTransactions = async (req, res) => {
   const merchantId = req.params.id;
+
+  if (idItsMe(req, merchantId)) {
+    return res.status(403).json();
+  }
 
   if (!merchantId) {
     return res.status(422).json();
@@ -79,6 +99,17 @@ exports.updateTransaction = async (req, res) => {
   if (!transactionToUpdate) {
     return res.status(404).json();
   }
+
+  /*
+  // si un lambda essai de modifier une transaction qui ne lui appartient pas
+  const { merchantId } = transactionToUpdate;
+
+  if (idItsMe(req, merchantId)) {
+    return res.status(403).json();
+  }
+
+   */
+
   const updatedTransaction = await transactionToUpdate.update(req.body, { where: { id: transactionId } });
 
   if (!updatedTransaction) {
@@ -96,6 +127,13 @@ exports.deleteTransaction = async (req, res) => {
   const transactionToArchive = await db.Transaction.findOne({ where: { id: transactionId } });
   if (!transactionToArchive) {
     return res.status(404).json();
+  }
+
+  // si un lambda essai d'archiver une transaction qui ne lui appartient pas
+  const { merchantId } = transactionToArchive;
+
+  if (idItsMe(req, merchantId)) {
+    return res.status(403).json();
   }
 
   const archivedTransaction = await db.Transaction.update(
