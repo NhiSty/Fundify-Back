@@ -25,7 +25,8 @@ exports.createOperationCapture = async (req, res) => {
 
   const operation = await db.Operation.create({
     type: 'captured',
-    ...restBody,
+    transactionId,
+    amount: restBody.amount,
   });
   return res.status(201).json(operation);
 };

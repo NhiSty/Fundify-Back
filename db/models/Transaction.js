@@ -53,6 +53,7 @@ module.exports = (connection) => {
       transactionId: transaction.id,
       status: transaction.status,
     });
+
     const newTransactionMDb = new TransactionMDb({
       transactionId: transaction.id,
       merchantId: transaction.merchantId,
@@ -60,6 +61,12 @@ module.exports = (connection) => {
       amount: transaction.amount,
       currency: transaction.currency,
       status: transaction.status,
+      statusHist: [
+        {
+          status: transaction.status,
+          date: Date.now(),
+        },
+      ],
     });
 
     await newTransactionMDb.save();

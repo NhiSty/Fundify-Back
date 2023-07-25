@@ -1,6 +1,6 @@
 const { Model, DataTypes } = require('sequelize');
 const OperationStatusHist = require('./OperationStatusHist');
-const OperationMDb = require('../../mongoDb/models/Operation');
+const TransactionMDb = require('../../mongoDb/models/Transaction');
 
 module.exports = (connection) => {
   class Operation extends Model {}
@@ -41,13 +41,22 @@ module.exports = (connection) => {
       operationId: operation.id,
       status: operation.status,
     });
-    const newOperationMDb = new OperationMDb({
-      type: operation.type,
-      amount: operation.amount,
-      transactionId: operation.transactionId,
-    });
 
-    await newOperationMDb.save();
+    await TransactionMDb.findOneAndUpdate({ transactionId: operation.transactionId }, {
+      $addToSet: {
+        operations: {
+          type: operation.type,
+          amount: parseInt(operation.amount, 10),
+          status: operation.status,
+          statusHist: [
+            {
+              status: operation.status,
+              date: Date.now(),
+            },
+          ],
+        },
+      },
+    });
   });
 
   // Après mise à jour d'une opération (Postgres) on met à jour l'opération correspondante (MongoDB)
@@ -56,20 +65,6 @@ module.exports = (connection) => {
       operationId: operation.id,
       status: operation.status,
     });
-
-    await OperationMDb.findOneAndUpdate(
-      { operationId: operation.id },
-      {
-        type: operation.type,
-        amount: operation.amount,
-        transactionId: operation.transactionId,
-      },
-    );
-  });
-
-  // Après suppression d'une opération (Postgres) on supprime l'opération correspondante (MongoDB)
-  Operation.afterDestroy(async (operation) => {
-    await OperationMDb.findOneAndDelete({ operationId: operation.id });
   });
 
   return Operation;
