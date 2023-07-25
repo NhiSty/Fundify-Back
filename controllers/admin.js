@@ -72,6 +72,11 @@ exports.getMerchants = async (req, res) => {
   });
 };
 
+exports.getUsers = async (req, res) => {
+  const users = await db.User.findAll();
+  return res.status(200).json(users);
+};
+
 exports.getTransactions = async (req, res) => {
   const transactions = await db.Transaction.findAll();
   return res.status(200).json(transactions);
