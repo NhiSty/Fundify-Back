@@ -20,6 +20,11 @@ module.exports = function (connection) {
 
   User.init(
     {
+      id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true,
+      },
       lastname: DataTypes.STRING,
       firstname: DataTypes.STRING,
       email: {

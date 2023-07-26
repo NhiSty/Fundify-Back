@@ -7,12 +7,17 @@ module.exports = (connection) => {
 
   Transaction.init(
     {
+      id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true,
+      },
       amount: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
       },
       merchantId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         allowNull: false,
         references: {
           model: 'Merchants',
@@ -20,7 +25,7 @@ module.exports = (connection) => {
         },
       },
       userId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         allowNull: false,
         references: {
           model: 'Users',

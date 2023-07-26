@@ -7,6 +7,11 @@ module.exports = (connection) => {
   class Operation extends Model {}
 
   Operation.init({
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
     type: {
       type: DataTypes.ENUM('capture', 'refund'),
       allowNull: false,
@@ -16,7 +21,7 @@ module.exports = (connection) => {
       allowNull: false,
     },
     transactionId: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
       references: {
         model: 'Transactions',
         key: 'id',

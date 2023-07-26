@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 
 const merchantSchema = new mongoose.Schema({
   merchantId: {
-    type: Number,
+    type: String,
     required: true,
     unique: true,
   },
