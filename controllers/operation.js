@@ -1,27 +1,28 @@
 const db = require('../db/index');
 const OperationValidator = require('../validator/OperationValidator');
+const TransactionMDb = require('../mongoDb/models/Transaction');
 
 exports.createOperation = async (req, res) => {
   const { transactionId } = req.body;
 
   if (!transactionId) {
-    res.sendStatus(422);
+    return res.sendStatus(422);
   }
-
-  if (!OperationValidator.validateAmount(req.body.amount)) {
-    res.sendStatus(422);
+  if (!await OperationValidator.validateAmount(req.body.amount, transactionId)) {
+    return res.sendStatus(422);
   }
   if (req.body.status && !OperationValidator.validateStatus(req.body.status)) {
-    res.sendStatus(422);
+    return res.sendStatus(422);
   }
 
   const transaction = await db.Transaction.findByPk(transactionId);
 
   if (!transaction) {
-    res.sendStatus(422);
+    return res.sendStatus(422);
   }
 
   const { type, ...restBody } = req.body;
+
   let operation;
 
   if (transaction.status === 'created') {
@@ -53,10 +54,10 @@ exports.createOperation = async (req, res) => {
     });
 
     await operation.update({ status: 'processing' }, { where: { id: operation.id } });
-    res.status(201).json(operation);
+    return res.status(201).json(operation);
   } catch (error) {
     await operation.update({ status: 'failed' }, { where: { id: operation.id } });
-    res.sendStatus(500);
+    return res.sendStatus(500);
   }
 };
 
@@ -205,25 +206,39 @@ exports.deleteOperation = async (req, res) => {
 };
 
 exports.operationWebhook = async (notificationData) => {
-  const operation = await db.Operation.findOne({ where: { id: notificationData.operationId } });
+  try {
+    const operation = await db.Operation.findOne({ where: { id: notificationData.operationId } });
 
-  if (!operation) {
-    throw new Error('Operation not found');
+    if (!operation) {
+      throw new Error('Operation not found');
+    }
+
+    await operation.update(
+      { status: 'done' },
+      { where: { id: notificationData.operationId } },
+    );
+    const transactionMDb = await TransactionMDb.findOne({ transactionId: notificationData.transactionId });
+
+    if (!transactionMDb) {
+      throw new Error('Transaction not found');
+    }
+
+    const refundAvailable = transactionMDb.refundAmountAvailable;
+    let status = 'captured';
+
+    if (operation.type === 'refund' && refundAvailable > 0) {
+      status = 'partial_refunded';
+    }
+
+    if (operation.type === 'refund' && refundAvailable === 0) {
+      status = 'refunded';
+    }
+
+    const transaction = await db.Transaction.findOne({ where: { id: notificationData.transactionId } });
+    await db.Transaction.update({ status }, { where: { id: transaction.id } });
+    await db.TransactionStatusHist.create({ status, transactionId: transaction.id });
+  } catch (error) {
+    console.log(error);
+    throw new Error('Error updating operation');
   }
-
-  await operation.update(
-    { status: 'done' },
-    { where: { id: notificationData.operationId } },
-  );
-
-  const transaction = await db.Transaction.findOne({ where: { id: notificationData.transactionId } });
-
-  if (!transaction) {
-    throw new Error('Transaction not found');
-  }
-
-  await transaction.update(
-    { status: 'captured' },
-    { where: { id: notificationData.transactionId } },
-  );
 };

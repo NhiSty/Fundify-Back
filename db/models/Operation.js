@@ -1,5 +1,6 @@
 const { Model, DataTypes } = require('sequelize');
 const OperationStatusHist = require('./OperationStatusHist');
+const TransactionStatusHist = require('./TransactionStatusHist');
 const TransactionMDb = require('../../mongoDb/models/Transaction');
 
 module.exports = (connection) => {
@@ -42,7 +43,14 @@ module.exports = (connection) => {
       status: operation.status,
     });
 
-    await TransactionMDb.findOneAndUpdate({ transactionId: operation.transactionId }, {
+    if (operation.type === 'refund') {
+      await TransactionStatusHist(connection).create({
+        transactionId: operation.transactionId,
+        status: 'waiting_refund',
+      });
+    }
+
+    await TransactionMDb.updateOne({ transactionId: operation.transactionId }, {
       $addToSet: {
         operations: {
           operationId: operation.id,
@@ -56,6 +64,17 @@ module.exports = (connection) => {
             },
           ],
         },
+        ...(operation.type === 'refund' && {
+          statusHist: [
+            {
+              status: 'waiting_refund',
+              date: Date.now(),
+            },
+          ],
+        }),
+      },
+      $set: {
+        ...(operation.type === 'refund' && { status: 'waiting_refund' }),
       },
     });
   });
@@ -88,12 +107,24 @@ module.exports = (connection) => {
       },
     ]).exec();
 
-    const trxStatus = refundAmountAvailable[0].remainingAmount === 0 ? 'refunded' : 'partial_refunded';
+    let trxStatus = 'captured';
+    const operationDone = operation.status;
+    const operationIsCapture = operation.type === 'capture';
+    const allIsRefunded = refundAmountAvailable[0].remainingAmount === 0;
+
+    if (!operationIsCapture && operationDone && allIsRefunded) {
+      trxStatus = 'refunded';
+    }
+
+    if (!operationIsCapture && operationDone && !allIsRefunded) {
+      trxStatus = 'partial_refunded';
+    }
+
     await TransactionMDb.updateOne({ transactionId: operation.transactionId, 'operations.operationId': operation.id }, {
       $set: {
         'operations.$.status': operation.status,
         refundAmountAvailable: refundAmountAvailable[0].remainingAmount,
-        ...(operation.status !== 'failed' && { status: trxStatus }),
+        ...(operation.status === 'done' && { status: trxStatus }),
       },
       $addToSet: {
         'operations.$.statusHist': [
@@ -102,7 +133,7 @@ module.exports = (connection) => {
             date: Date.now(),
           },
         ],
-        ...(operation.status !== 'failed' && {
+        ...((operation.status === 'done') && {
           statusHist: [
             {
               status: trxStatus,
@@ -112,33 +143,6 @@ module.exports = (connection) => {
         }),
       },
     });
-
-    /* await TransactionMDb.findOneAndUpdate({ transactionId: operation.transactionId }, {
-      $addToSet: {
-        operations: {
-          operationId: operation.id,
-          status: operation.status,
-          statusHist: [
-            {
-              status: operation.status,
-              date: Date.now(),
-            },
-          ],
-        },
-        ...(operation.status !== 'failed' && {
-          statusHist: [
-            {
-              status: trxStatus,
-              date: Date.now(),
-            },
-          ],
-        }),
-      },
-      $set: {
-        ...(operation.status !== 'failed' && { status: trxStatus }),
-        refundedAmountAvailable: refundedAmountAvailable[0].remainingAmount,
-      },
-    }); */
   });
 
   return Operation;

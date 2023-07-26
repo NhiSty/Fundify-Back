@@ -8,10 +8,10 @@ router.post('/operation/webhook', async (req, res) => {
 
   try {
     await operationCtrl.operationWebhook(data);
-    res.sendStatus(200);
+    return res.sendStatus(200);
   } catch (error) {
     console.log('in error');
-    res.sendStatus(404);
+    return res.sendStatus(404);
   }
 });
 

@@ -73,25 +73,6 @@ module.exports = (connection) => {
     await newTransactionMDb.save();
   });
 
-  // Après mise à jour d'une transaction (Postgres) on met à jour la transaction correspondante (MongoDB)
-  Transaction.afterUpdate(async (transaction) => {
-    await TransactionStatusHist(connection).create({
-      transactionId: transaction.id,
-      status: transaction.status,
-    });
-
-    await TransactionMDb.findOneAndUpdate(
-      { transactionId: transaction.id },
-      {
-        merchantId: transaction.merchantId,
-        userId: transaction.userId,
-        amount: transaction.amount,
-        currency: transaction.currency,
-        status: transaction.status,
-      },
-    );
-  });
-
   // Après suppression d'une transaction (Postgres) on supprime la transaction correspondante (MongoDB)
   Transaction.afterDestroy(async (transaction) => {
     await TransactionMDb.findOneAndDelete({ transactionId: transaction.id });
