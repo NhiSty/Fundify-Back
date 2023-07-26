@@ -99,4 +99,3 @@ module.exports = (connection) => {
 
   return Transaction;
 };
-
