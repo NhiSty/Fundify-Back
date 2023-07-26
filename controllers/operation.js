@@ -61,65 +61,6 @@ exports.createOperation = async (req, res) => {
   }
 };
 
-exports.createOperationCapture = async (req, res) => {
-  const { transactionId } = req.body;
-
-  if (!transactionId) {
-    return res.status(422).json();
-  }
-
-  if (!OperationValidator.validateAmount(req.body.amount)) {
-    return res.status(422).json();
-  }
-  if (req.body.status && !OperationValidator.validateStatus(req.body.status)) {
-    return res.status(422).json();
-  }
-
-  const transaction = await db.Transaction.findByPk(transactionId);
-
-  if (!transaction) {
-    return res.status(404).json();
-  }
-
-  const { type, ...restBody } = req.body;
-
-  const operation = await db.Operation.create({
-    type: 'capture',
-    transactionId,
-    amount: restBody.amount,
-  });
-  return res.status(201).json(operation);
-};
-
-exports.createOperationRefund = async (req, res) => {
-  const { transactionId } = req.body;
-
-  if (!transactionId) {
-    return res.status(422).json();
-  }
-
-  if (!OperationValidator.validateAmount(req.body.amount)) {
-    return res.status(422).json();
-  }
-  if (req.body.status && !OperationValidator.validateStatus(req.body.status)) {
-    return res.status(422).json();
-  }
-
-  const transaction = await db.Transaction.findByPk(transactionId);
-
-  if (!transaction) {
-    return res.status(404).json();
-  }
-
-  const { type, ...restBody } = req.body;
-
-  const operation = await db.Operation.create({
-    type: 'refund',
-    ...restBody,
-  });
-  return res.status(201).json(operation);
-};
-
 exports.getOperation = async (req, res) => {
   const operationId = req.params.id;
 
