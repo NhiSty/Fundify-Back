@@ -11,7 +11,7 @@ const authMiddleware = require('./middleware/authMiddleware');
 const merchantRoutes = require('./routes/merchant');
 const transactionRoutes = require('./routes/transaction');
 const operationRoutes = require('./routes/operation');
-const adminRoutes = require('./routes/admin');
+const userRoutes = require('./routes/user');
 
 app.use(bodyParser.json({ limit: '5mb' }));
 app.use(cors(
@@ -30,11 +30,9 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/api/auth/merchant', merchantRoutes.signup);
-app.use('/api/auth/merchant', merchantRoutes.login);
-app.use('/api/auth', adminRoutes.signup);
-app.use('/api/auth', adminRoutes.login);
-app.use('/api/auth/logout', adminRoutes.logout);
+app.use('/api/auth', userRoutes.create);
+app.use('/api/auth', userRoutes.login);
+app.use('/api/auth/logout', userRoutes.logout);
 
 app.use(authMiddleware);
 app.use('/api', operationRoutes.createCaptureOperation);
@@ -53,7 +51,8 @@ app.use('/api', transactionRoutes.updateTransaction);
 app.use('/api', merchantRoutes.getMerchantAccount);
 app.use('/api', merchantRoutes.getMerchantTransactions);
 
-app.use('/api', adminRoutes.setAdmin);
+app.use('/api', userRoutes.setAdmin);
+app.use('/api', userRoutes.validateMerchant);
 
 app.use(errorHandler);
 

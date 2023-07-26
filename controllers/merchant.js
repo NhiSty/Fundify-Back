@@ -53,7 +53,7 @@ exports.login = async (req, res) => {
   }
 
   try {
-    const merchand = await db.Merchant.findOne({ where: { contactEmail: req.body.contactEmail } });
+    const merchand = await db.findOne({ where: { contactEmail: req.body.contactEmail } });
     if (!merchand) {
       return res.status(404)
         .json();
@@ -93,12 +93,9 @@ exports.getMerchantTransactions = async (req, res) => {
       .json();
   }
 
-  if (idItsMe(req, merchantId)) {
-    return res.status(403)
-      .json();
-  }
+  const merchant = await db.Merchant.findOne({ where: { id: merchantId }, include: { model: Credential } });
 
-  const merchant = await db.Merchant.findByPk(merchantId);
+  console.log(merchant);
   if (!merchant) {
     return res.status(404)
       .json();

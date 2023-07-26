@@ -3,7 +3,8 @@ const db = require('../db');
 
 // eslint-disable-next-line consistent-return
 module.exports = async (req, res, next) => {
-  const merchantId = req.body || req.params.id;
+  const merchantId = req.method === 'GET' ? req.params.id : req.body.merchantId;
+
   try {
     if (merchantId) {
       const merchant = await db.Merchant.findByPk(merchantId);
@@ -14,10 +15,10 @@ module.exports = async (req, res, next) => {
       if (merchant.approved) {
         next();
       } else {
+        console.log('Merchant not approved');
         return res.sendStatus(403);
       }
     }
-
     next();
   } catch (error) {
     next(error);

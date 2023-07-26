@@ -15,7 +15,7 @@ module.exports = function (connection) {
       type: DataTypes.BLOB,
       allowNull: false,
     },
-    email: {
+    contactEmail: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
@@ -25,7 +25,7 @@ module.exports = function (connection) {
       allowNull: false,
       unique: true,
     },
-    phone: {
+    contactPhone: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -52,6 +52,7 @@ module.exports = function (connection) {
         model: 'Credentials',
         key: 'id',
       },
+      allowNull: true,
     },
   }, {
     sequelize: connection,

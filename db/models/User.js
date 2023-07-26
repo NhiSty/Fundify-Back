@@ -52,7 +52,7 @@ module.exports = function (connection) {
     },
     {
       sequelize: connection,
-      modelName: 'Admin',
+      modelName: 'User',
     },
   );
 
