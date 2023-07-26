@@ -8,6 +8,7 @@ const path = require('path');
 const errorHandler = require('./middleware/errorHandler');
 const merchantAuthMiddleware = require('./middleware/merchantAuthMiddleware');
 const authMiddleware = require('./middleware/authMiddleware');
+const bearerMiddleware = require('./middleware/bearerMiddleware');
 const merchantRoutes = require('./routes/merchant');
 const transactionRoutes = require('./routes/transaction');
 const operationRoutes = require('./routes/operation');
@@ -24,7 +25,8 @@ app.use(cors(
 app.use((req, res, next) => {
   if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
     if (!req.is('application/json')) {
-      return res.status(400).json();
+      return res.status(400)
+        .json();
     }
   }
   next();
@@ -43,6 +45,7 @@ app.use('/api', operationRoutes.deleteOperation);
 app.use('/api', operationRoutes.getTransactionOperations);
 
 app.use(merchantAuthMiddleware);
+app.use(bearerMiddleware);
 app.use('/api', transactionRoutes.getMerchantTransactions);
 app.use('/api', transactionRoutes.getTransaction);
 app.use('/api', transactionRoutes.deleteTransaction);

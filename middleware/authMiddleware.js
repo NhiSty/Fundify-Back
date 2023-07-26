@@ -5,7 +5,21 @@ module.exports = async (req, res, next) => {
   try {
     const token = req.headers.cookie.split('token=')[1];
     const decodedToken = jsonwebtoken.verify(token, `${process.env.JWT_SECRET}`);
-    const { id } = decodedToken;
+    const {
+      id,
+      merchantId,
+    } = decodedToken;
+
+    if (merchantId && merchantId) {
+      req.userId = merchantId;
+      req.merchantId = merchantId;
+      req.role = 'merchant';
+    }
+
+    if (id && !merchantId) {
+      req.userId = id;
+      req.role = 'user';
+    }
 
     if (!id) {
       throw new Error('You are not allowed to access this ressource');

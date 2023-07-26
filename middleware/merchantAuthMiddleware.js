@@ -3,6 +3,9 @@ const db = require('../db');
 
 // eslint-disable-next-line consistent-return
 module.exports = async (req, res, next) => {
+  if (req.role !== 'merchant') {
+    return next();
+  }
   const merchantId = req.method === 'GET' ? req.params.id : req.body.merchantId;
 
   try {
@@ -15,15 +18,11 @@ module.exports = async (req, res, next) => {
       if (merchant.approved) {
         next();
       } else {
-        console.log('Merchant not approved');
-        return res.sendStatus(403);
+        throw new Error('You are not allowed to access this ressource');
       }
     }
     next();
   } catch (error) {
     next(error);
-    // Display error message
-    res.status(401)
-      .json();
   }
 };

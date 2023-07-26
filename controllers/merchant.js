@@ -86,6 +86,7 @@ exports.login = async (req, res) => {
 };
 
 exports.getMerchantTransactions = async (req, res) => {
+  console.log(req.role);
   const merchantId = req.params.id;
 
   if (!merchantId) {
@@ -93,9 +94,8 @@ exports.getMerchantTransactions = async (req, res) => {
       .json();
   }
 
-  const merchant = await db.Merchant.findOne({ where: { id: merchantId }, include: { model: Credential } });
+  const merchant = await db.Merchant.findOne({ where: { id: merchantId } });
 
-  console.log(merchant);
   if (!merchant) {
     return res.status(404)
       .json();
@@ -150,12 +150,12 @@ exports.getMerchantAccount = async (req, res) => {
 };
 
 exports.updateMerchant = async (req, res) => {
-  if (admin) {
-    merchantToUpdate.update(req.body, { where: { id } });
-  }
+  /* if (admin) {
+     merchantToUpdate.update(req.body, { where: { id } });
+   }
 
-  req.body.approved = merchantToUpdate.approved;
-  merchantToUpdate.update(req.body, { where: { id } });
+   req.body.approved = merchantToUpdate.approved;
+   merchantToUpdate.update(req.body, { where: { id } });
 
-  return res.status(200);
+   return res.status(200);*/
 };
