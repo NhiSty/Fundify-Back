@@ -1,5 +1,7 @@
 const jsonwebtoken = require('jsonwebtoken');
 const db = require('../db');
+require('dotenv')
+  .config();
 
 // eslint-disable-next-line consistent-return
 module.exports = async (req, res, next) => {
@@ -11,13 +13,15 @@ module.exports = async (req, res, next) => {
       merchantId,
     } = decodedToken;
 
-    if (merchantId && merchantId) {
+    if (merchantId && id) {
       req.userId = merchantId;
       req.merchantId = merchantId;
       req.role = 'merchant';
       return next();
     }
-    if (id && !merchantId && req.hostname === process.env.HOSTNAME) {
+    if (id && !merchantId && req.hostname === process.env.DOMAIN_HOST) {
+      console.log('auth merchant id :', merchantId);
+      console.log('auth user id :', id);
       req.userId = id;
       req.role = 'user';
       return next();

@@ -47,7 +47,6 @@ app.use((req, res, next) => {
 app.use('/api/auth', userRoutes.create);
 app.use('/api/', sdkRoutes);
 app.use('/api', webhooks);
-app.use('/api/auth', userRoutes.signup);
 app.use('/api/auth', userRoutes.login);
 app.use('/api/auth/logout', userRoutes.logout);
 
@@ -58,8 +57,8 @@ app.use('/api', operationRoutes.updateOperation);
 app.use('/api', operationRoutes.deleteOperation);
 app.use('/api', operationRoutes.getTransactionOperations);
 
-//app.use(merchantAuthMiddleware);
-//app.use(bearerMiddleware);
+// app.use(merchantAuthMiddleware);
+// app.use(bearerMiddleware);
 app.use('/api', transactionRoutes.getMerchantTransactions);
 app.use('/api', transactionRoutes.getTransaction);
 app.use('/api', transactionRoutes.deleteTransaction);

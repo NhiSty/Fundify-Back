@@ -118,16 +118,25 @@ exports.getMerchantTransactions = async (req, res, next) => {
 exports.getMerchantAccount = async (req, res, next) => {
   const merchantId = req.params.id;
   try {
-    if (!req.merchantId || parseInt(req.merchantId, 10) !== parseInt(merchantId, 10)) {
+    console.log(parseInt(req.merchantId, 10) !== parseInt(merchantId, 10));
+    console.log(req.role);
+
+    if (req.role !== 'user') {
+      if (parseInt(req.merchantId, 10) !== parseInt(merchantId, 10)) {
+        throw new Error('401 Unauthorized');
+      }
+    }
+
+    if ((!req.merchantId && req.role !== 'user')) {
       throw new Error('401 Unauthorized');
     }
 
-    const merchant = await db.Merchant.findOne({ where: { id: req.merchantId } });
-
+    const merchant = await db.Merchant.findOne({ where: { id: merchantId } });
     if (!merchant) {
       throw new Error('404 Not Found');
     }
 
+    console.log(res.headersSent);
     return res.status(200)
       .json({
         contactEmail: merchant.contactEmail,
