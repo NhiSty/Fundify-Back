@@ -1,33 +1,44 @@
 exports.verifications = async (req, res) => {
-  const { id, amount, currency } = req.body;
-  res.status(200).json();
+  const {
+    amount, currency, transactionId, operationId,
+  } = req.body;
+
+  console.log({
+    amount, currency, transactionId, operationId,
+  });
+
+  res.sendStatus(200);
 
   // Simule un délai d'attente de 5 secondes
-  // eslint-disable-next-line no-use-before-define
-  await pspSimulation(
-    `http://node:1337/api/transaction/${id}/confirm`,
-    5000,
-    {
-      id,
+  setTimeout(() => {
+    // eslint-disable-next-line no-use-before-define
+    sendDoneNotification({
       amount,
       currency,
-    },
-  );
+      transactionId,
+      operationId,
+    });
+  }, 5000);
 };
 
-// Fonction pour simuler le délai d'attente avec une promesse
-function pspSimulation(url, ms, body) {
-  // eslint-disable-next-line no-promise-executor-return
-  return new Promise((resolve) => {
-    setTimeout(async () => {
-      await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      });
-      resolve();
-    }, ms);
-  });
+function sendDoneNotification(body) {
+  const url = 'http://node:1337/api/operation/webhook';
+
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  })
+    .then((response) => {
+      if (response.status === 200) {
+        console.log('Notification de paiement envoyée avec succès à votre API.');
+      } else {
+        throw new Error('Erreur lors de l\'envoi de la notification de paiement à votre API.');
+      }
+    })
+    .catch((error) => {
+      console.error(error.message);
+    });
 }

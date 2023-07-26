@@ -1,6 +1,6 @@
 module.exports = {
   validateType: (type) => {
-    const validTypeValues = ['captured', 'refunded'];
+    const validTypeValues = ['capture', 'refund'];
     return validTypeValues.includes(type);
   },
   validateAmount: (amount) => {

@@ -32,7 +32,7 @@ module.exports = (connection) => {
         allowNull: false,
       },
       status: {
-        type: DataTypes.ENUM('created', 'captured', 'waiting_refunded', 'partial_refunded', 'refunded', 'cancelled'),
+        type: DataTypes.ENUM('created', 'captured', 'waiting_refund', 'partial_refunded', 'refunded', 'cancelled'),
         defaultValue: 'created',
       },
       deletedAt: {
@@ -61,6 +61,7 @@ module.exports = (connection) => {
       amount: transaction.amount,
       currency: transaction.currency,
       status: transaction.status,
+      refundAmountAvailable: transaction.amount,
       statusHist: [
         {
           status: transaction.status,
@@ -78,6 +79,7 @@ module.exports = (connection) => {
       transactionId: transaction.id,
       status: transaction.status,
     });
+
     await TransactionMDb.findOneAndUpdate(
       { transactionId: transaction.id },
       {
@@ -97,3 +99,4 @@ module.exports = (connection) => {
 
   return Transaction;
 };
+

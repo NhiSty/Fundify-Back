@@ -16,6 +16,7 @@ const transactionRoutes = require('./routes/transaction');
 const operationRoutes = require('./routes/operation');
 const adminRoutes = require('./routes/admin');
 const sdkRoutes = require('./routes/sdk');
+const webhooks = require('./routes/webhook');
 
 app.set('view engine', 'ejs');
 
@@ -38,6 +39,7 @@ app.use((req, res, next) => {
 });
 app.use(errorHandler);
 app.use('/api/', sdkRoutes);
+app.use('/api', webhooks);
 app.use('/api/auth', userRoutes.signup);
 app.use('/api/auth', userRoutes.login);
 app.use('/api/auth', userRoutes.logout);
@@ -47,7 +49,7 @@ app.use('/api/auth/merchant', merchantRoutes.login);
 
 // apres ce middleware, toutes les routes sont protegees par une authentification
 app.use(userAuthMiddleware);
-app.use('/api', operationRoutes.createCaptureOperation);
+app.use('/api', operationRoutes.createOperation);
 app.use('/api', transactionRoutes.createTransaction);
 
 app.use(merchantAuthMiddleware);

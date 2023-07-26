@@ -22,8 +22,8 @@ const transactionSchema = new mongoose.Schema({
       },
       type: {
         type: String,
-        enum: ['captured', 'refunded'],
-        default: 'captured',
+        enum: ['capture', 'refund'],
+        default: 'capture',
       },
       amount: {
         type: Number,
@@ -52,7 +52,7 @@ const transactionSchema = new mongoose.Schema({
     {
       status: {
         type: String,
-        enum: ['created', 'captured', 'waiting_refunded', 'partial_refunded', 'refunded', 'cancelled'],
+        enum: ['created', 'captured', 'waiting_refund', 'partial_refunded', 'refunded', 'cancelled'],
         default: 'created',
       },
       date: {
@@ -65,13 +65,17 @@ const transactionSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  refundAmountAvailable: {
+    type: Number,
+    required: true,
+  },
   currency: {
     type: String,
     required: true,
   },
   status: {
     type: String,
-    enum: ['created', 'captured', 'waiting_refunded', 'partial_refunded', 'refunded', 'cancelled'],
+    enum: ['created', 'captured', 'waiting_refund', 'partial_refunded', 'refunded', 'cancelled'],
     default: 'created',
   },
 });

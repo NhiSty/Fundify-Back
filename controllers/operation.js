@@ -1,5 +1,65 @@
 const db = require('../db/index');
 const OperationValidator = require('../validator/OperationValidator');
+const TransactionMDb = require('../mongoDb/models/Transaction');
+
+exports.createOperation = async (req, res) => {
+  const { transactionId } = req.body;
+
+  if (!transactionId) {
+    res.sendStatus(422);
+  }
+
+  if (!OperationValidator.validateAmount(req.body.amount)) {
+    res.sendStatus(422);
+  }
+  if (req.body.status && !OperationValidator.validateStatus(req.body.status)) {
+    res.sendStatus(422);
+  }
+
+  const transaction = await db.Transaction.findByPk(transactionId);
+
+  if (!transaction) {
+    res.sendStatus(422);
+  }
+
+  const { type, ...restBody } = req.body;
+  let operation;
+
+  if (transaction.status === 'created') {
+    operation = await db.Operation.create({
+      type: 'capture',
+      transactionId,
+      amount: restBody.amount,
+    });
+  } else {
+    operation = await db.Operation.create({
+      type: 'refund',
+      transactionId,
+      amount: restBody.amount,
+    });
+  }
+
+  try {
+    await fetch('http://psp:1338/api/psp/transactions/verifications', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        amount: restBody.amount,
+        currency: transaction.currency,
+        operationId: operation.id,
+        transactionId: transaction.id,
+      }),
+    });
+
+    await operation.update({ status: 'processing' }, { where: { id: operation.id } });
+    res.status(201).json(operation);
+  } catch (error) {
+    await operation.update({ status: 'failed' }, { where: { id: operation.id } });
+    res.sendStatus(500);
+  }
+};
 
 exports.createOperationCapture = async (req, res) => {
   const { transactionId } = req.body;
@@ -24,7 +84,7 @@ exports.createOperationCapture = async (req, res) => {
   const { type, ...restBody } = req.body;
 
   const operation = await db.Operation.create({
-    type: 'captured',
+    type: 'capture',
     transactionId,
     amount: restBody.amount,
   });
@@ -54,7 +114,7 @@ exports.createOperationRefund = async (req, res) => {
   const { type, ...restBody } = req.body;
 
   const operation = await db.Operation.create({
-    type: 'refunded',
+    type: 'refund',
     ...restBody,
   });
   return res.status(201).json(operation);
@@ -143,4 +203,28 @@ exports.deleteOperation = async (req, res) => {
     return res.status(404).json();
   }
   return res.status(204).send();
+};
+
+exports.operationWebhook = async (notificationData) => {
+  const operation = await db.Operation.findOne({ where: { id: notificationData.operationId } });
+
+  if (!operation) {
+    throw new Error('Operation not found');
+  }
+
+  await operation.update(
+    { status: 'done' },
+    { where: { id: notificationData.operationId } },
+  );
+
+  const transaction = await db.Transaction.findOne({ where: { id: notificationData.transactionId } });
+
+  if (!transaction) {
+    throw new Error('Transaction not found');
+  }
+
+  await transaction.update(
+    { status: 'captured' },
+    { where: { id: notificationData.transactionId } },
+  );
 };
