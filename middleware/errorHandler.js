@@ -1,12 +1,18 @@
-const ValidationError = require('../errors/ValidationError');
-
-// eslint-disable-next-line func-names,no-unused-vars
-module.exports = function (err, req, res, next) {
-  // eslint-disable-next-line no-console
-  console.error(err);
-  if (err instanceof ValidationError) {
-    res.status(422).json(err.errors);
-  } else {
-    res.status(500).json();
+module.exports = function handler(err, req, res, next) {
+  switch (err.message) {
+    case '404 Not Found':
+      return res.sendStatus(404);
+    case '403 Forbidden':
+      return res.sendStatus(403);
+    case '401 Unauthorized':
+      return res.sendStatus(401);
+    case '422 Unprocessable Entity':
+      return res.sendStatus(422);
+    case '409 Conflict':
+      return res.sendStatus(409);
+    default:
+      console.log(err);
+      break;
   }
+  return next();
 };

@@ -1,6 +1,5 @@
 const db = require('../db/index');
 const validator = require('../validator/MerchantValidator');
-const idItsMe = require('../utils/idItsMe');
 
 exports.signup = async (req, res) => {
   if (!validator.validateEmail(req.body.contactEmail)
@@ -85,49 +84,48 @@ exports.login = async (req, res) => {
     .json();
 };
 
-exports.getMerchantTransactions = async (req, res) => {
-  console.log(req.role);
-  const merchantId = req.params.id;
-
-  if (!merchantId) {
-    return res.status(422)
-      .json();
-  }
-
-  const merchant = await db.Merchant.findOne({ where: { id: merchantId } });
-
-  if (!merchant) {
-    return res.status(404)
-      .json();
-  }
-
-  const transactions = await db.Transaction.findAll({
-    where: { merchantId },
-  });
-
-  return res.status(200)
-    .json(transactions);
-};
-
-exports.getMerchantAccount = async (req, res) => {
+// eslint-disable-next-line consistent-return
+exports.getMerchantTransactions = async (req, res, next) => {
   const merchantId = req.params.id;
 
   try {
     if (!merchantId) {
-      return res.status(422)
-        .json();
+      throw new Error('422 Unprocessable Entity');
     }
 
-    if (idItsMe(req, merchantId)) {
-      return res.status(403)
-        .json();
+    if (!req.merchantId || parseInt(req.merchantId, 10) !== parseInt(merchantId, 10)) {
+      throw new Error('401 Unauthorized');
     }
 
     const merchant = await db.Merchant.findOne({ where: { id: merchantId } });
 
     if (!merchant) {
-      return res.status(404)
-        .json();
+      throw new Error('404 Not Found');
+    }
+
+    const transactions = await db.Transaction.findAll({
+      where: { merchantId },
+    });
+
+    return res.status(200)
+      .json(transactions);
+  } catch (e) {
+    next(e);
+  }
+};
+
+// eslint-disable-next-line consistent-return
+exports.getMerchantAccount = async (req, res, next) => {
+  const merchantId = req.params.id;
+  try {
+    if (!req.merchantId || parseInt(req.merchantId, 10) !== parseInt(merchantId, 10)) {
+      throw new Error('401 Unauthorized');
+    }
+
+    const merchant = await db.Merchant.findOne({ where: { id: req.merchantId } });
+
+    if (!merchant) {
+      throw new Error('404 Not Found');
     }
 
     return res.status(200)
@@ -143,9 +141,7 @@ exports.getMerchantAccount = async (req, res) => {
         kbis: merchant.kbis,
       });
   } catch (e) {
-    console.log(e);
-    return res.status(500)
-      .json();
+    next(e);
   }
 };
 
@@ -157,5 +153,5 @@ exports.updateMerchant = async (req, res) => {
    req.body.approved = merchantToUpdate.approved;
    merchantToUpdate.update(req.body, { where: { id } });
 
-   return res.status(200);*/
+   return res.status(200); */
 };

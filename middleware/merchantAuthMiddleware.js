@@ -1,24 +1,23 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 const db = require('../db');
-
 // eslint-disable-next-line consistent-return
 module.exports = async (req, res, next) => {
-  if (req.role !== 'merchant') {
+  if (req.role === 'user') {
     return next();
   }
-  const merchantId = req.method === 'GET' ? req.params.id : req.body.merchantId;
+  const { merchantId } = req;
 
   try {
     if (merchantId) {
       const merchant = await db.Merchant.findByPk(merchantId);
       if (!merchant) {
-        return res.sendStatus(404);
+        throw new Error('404 Not Found');
       }
 
       if (merchant.approved) {
         next();
       } else {
-        throw new Error('You are not allowed to access this ressource');
+        throw new Error('403 Forbidden');
       }
     }
     next();

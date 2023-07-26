@@ -3,38 +3,38 @@ const db = require('../db');
 
 // eslint-disable-next-line consistent-return
 module.exports = async (req, res, next) => {
-  if (req.role !== 'merchant') {
+  if (req.role === 'user') {
     return next();
   }
-  if (!req.headers.bearer) {
-    return res.sendStatus(403);
-  }
-  const separator = req.headers.bearer.indexOf(':');
-  const merchantId = req.headers.bearer.slice(0, separator);
-  const merchantToken = req.headers.bearer.split(':');
 
   try {
+    if (!req.headers.bearer) {
+      throw new Error('403 Forbidden');
+    }
+    const separator = req.headers.bearer.indexOf(':');
+    const merchantId = req.headers.bearer.slice(0, separator);
+    const merchantToken = req.headers.bearer.split(':');
+
     if (merchantId) {
       const merchant = await db.Merchant.findByPk(merchantId);
       if (!merchant) {
-        return res.sendStatus(404);
+        throw new Error('404 Not Found');
       }
       if (merchant) {
         const credentials = await db.Credential.findByPk(merchant.credentialsId);
         if (!credentials) {
-          return res.sendStatus(404);
+          throw new Error('404 Not Found');
         }
 
         const tokenIsValid = credentials.clientToken === merchantToken[1];
 
         if (!tokenIsValid) {
-          return res.sendStatus(403);
+          throw new Error('403 Forbidden');
         }
         return next();
       }
     }
   } catch (error) {
-    console.log(error);
     return next(error);
   }
 };

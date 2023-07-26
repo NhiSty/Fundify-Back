@@ -9,6 +9,7 @@ const validator = require('../validator/UserValidator');
 
 exports.validateMarchant = async (req, res) => {
   const merchantId = req.body.id;
+  console.log(merchantId);
   if (!merchantId) {
     return res.status(422)
       .json();
@@ -18,6 +19,8 @@ exports.validateMarchant = async (req, res) => {
   token.defaults.secret = secret;
 
   const merchantToApprove = await db.Merchant.findOne({ where: { id: merchantId } });
+
+  console.log(merchantToApprove);
 
   if (!merchantToApprove) {
     return res.status(404)
@@ -238,6 +241,7 @@ exports.login = async (req, res) => {
       {
         httpOnly: false,
         secure: false,
+        sameSite: 'none',
       },
     )
       .status(200)
