@@ -6,6 +6,7 @@ require('dotenv').config();
 const connection = new Sequelize(process.env.PG_DATABASE_URL, {
   dialect: 'postgres',
 });
+
 const db = {
   connection,
 };

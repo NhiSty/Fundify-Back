@@ -1,5 +1,11 @@
 const jsonwebtoken = require('jsonwebtoken');
 const db = require('../db/index');
+
+const statusEnum = [
+  'PENDING',
+  'CONFIRMED',
+  'CANCELLED',
+];
 const TransactionValidator = require('../validator/TransactionValidator');
 const idItsMe = require('../utils/idItsMe');
 
@@ -14,9 +20,10 @@ exports.createTransaction = async (req, res) => {
     return res.status(422).json();
   }
 
-  if (req.body.status && !TransactionValidator.validateStatus(req.body.status)) {
+  if (req.body.status && statusEnum.includes(req.body.status) === false) {
     return res.status(422).json();
   }
+
   if (!TransactionValidator.validateAmount(req.body.amount)) {
     return res.status(422).json();
   }
@@ -31,6 +38,7 @@ exports.createTransaction = async (req, res) => {
   }
 
   const transaction = await db.Transaction.create(req.body);
+
   return res.status(201).json(transaction);
 };
 
@@ -85,7 +93,7 @@ exports.updateTransaction = async (req, res) => {
   if (!transactionId) {
     return res.status(422).json();
   }
-  if (req.body.status && !TransactionValidator.validateStatus(req.body.status)) {
+  if (req.body.status && statusEnum.includes(req.body.status) === false) {
     return res.status(422).json();
   }
   if (req.body.amount && !TransactionValidator.validateAmount(req.body.amount)) {
@@ -145,4 +153,28 @@ exports.deleteTransaction = async (req, res) => {
     return res.status(404).json();
   }
   return res.status(204).send();
+};
+
+exports.confirmTransaction = async (req, res) => {
+  const transactionId = req.params.id;
+  if (!transactionId) {
+    return res.status(422).json();
+  }
+
+  const transaction = await db.Transaction.findOne({ where: { id: transactionId } });
+  if (!transaction) {
+    return res.status(404).json();
+  }
+
+  if (transaction.status !== 'PENDING') {
+    return res.status(409).json();
+  }
+
+  const updatedTransaction = await transaction.update({ status: 'CONFIRMED' }, { where: { id: transactionId } });
+
+  if (!updatedTransaction) {
+    return res.status(404).json();
+  }
+  return res.status(200).json(updatedTransaction);
+  // console.log('Youhou, j\'ai réussi à faire le PSP !');
 };

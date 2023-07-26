@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 const express = require('express');
 const cors = require('cors');
+require('./mongoDb/index');
 
 const app = express();
 const bodyParser = require('body-parser');
@@ -12,12 +13,23 @@ const bearerMiddleware = require('./middleware/bearerMiddleware');
 const merchantRoutes = require('./routes/merchant');
 const transactionRoutes = require('./routes/transaction');
 const operationRoutes = require('./routes/operation');
+const adminRoutes = require('./routes/admin');
+const sdkRoutes = require('./routes/sdk');
+const webhooks = require('./routes/webhook');
+
+app.set('view engine', 'ejs');
 const userRoutes = require('./routes/user');
 
 app.use(bodyParser.json({ limit: '5mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
 app.use(cors(
   {
-    origin: 'http://localhost:3000',
+    origin: [
+      'http://localhost:8080',
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+      'http://localhost:3000',
+    ],
     credentials: true,
   },
 ));
@@ -33,12 +45,14 @@ app.use((req, res, next) => {
 });
 
 app.use('/api/auth', userRoutes.create);
+app.use('/api/', sdkRoutes);
+app.use('/api', webhooks);
+app.use('/api/auth', userRoutes.signup);
 app.use('/api/auth', userRoutes.login);
 app.use('/api/auth/logout', userRoutes.logout);
 
 app.use(authMiddleware);
-app.use('/api', operationRoutes.createCaptureOperation);
-app.use('/api', operationRoutes.createRefundOperation);
+app.use('/api', operationRoutes.createOperation);
 app.use('/api', operationRoutes.getOperation);
 app.use('/api', operationRoutes.updateOperation);
 app.use('/api', operationRoutes.deleteOperation);
