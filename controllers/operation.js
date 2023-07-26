@@ -1,6 +1,5 @@
 const db = require('../db/index');
 const OperationValidator = require('../validator/OperationValidator');
-const TransactionMDb = require('../mongoDb/models/Transaction');
 
 exports.createOperation = async (req, res) => {
   const { transactionId } = req.body;
