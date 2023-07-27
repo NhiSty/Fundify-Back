@@ -174,6 +174,7 @@ exports.create = async (req, res) => {
           });
       }
     } catch (e) {
+      console.log(e);
       if (e instanceof UniqueConstraintError) {
         return res.status(409)
           .json();
@@ -200,6 +201,7 @@ exports.create = async (req, res) => {
         });
     }
   } catch (e) {
+    console.log(e);
     if (e instanceof UniqueConstraintError) {
       return res.status(409)
         .json();
