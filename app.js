@@ -13,7 +13,6 @@ const bearerMiddleware = require('./middleware/bearerMiddleware');
 const merchantRoutes = require('./routes/merchant');
 const transactionRoutes = require('./routes/transaction');
 const operationRoutes = require('./routes/operation');
-const adminRoutes = require('./routes/admin');
 const sdkRoutes = require('./routes/sdk');
 const webhooks = require('./routes/webhook');
 
@@ -48,7 +47,7 @@ app.use('/api/auth', userRoutes.create);
 app.use('/api/', sdkRoutes);
 app.use('/api', webhooks);
 app.use('/api/auth', userRoutes.login);
-app.use('/api/auth/logout', userRoutes.logout);
+app.use('/api/auth', userRoutes.logout);
 
 app.use(authMiddleware);
 app.use('/api', operationRoutes.createOperation);
@@ -68,7 +67,7 @@ app.use('/api', merchantRoutes.getMerchantAccount);
 app.use('/api', merchantRoutes.getMerchantTransactions);
 
 app.use('/api', userRoutes.setAdmin);
-app.use('/api', userRoutes.validateMerchant);
+app.use('/api', userRoutes.validateOrInvalidateMerchant);
 
 app.use(errorHandler);
 

@@ -66,8 +66,6 @@ module.exports = function (connection) {
     const newMerchant = new MerchantMongo({
       merchantId: merchant.id,
       companyName: merchant.companyName,
-      firstName: merchant.contactFirstName,
-      lastName: merchant.contactLastName,
       email: merchant.contactEmail,
       phone: merchant.contactPhone,
       approved: merchant.approved,
@@ -82,8 +80,6 @@ module.exports = function (connection) {
       { merchantId: merchant.id },
       {
         companyName: merchant.companyName,
-        firstName: merchant.contactFirstName,
-        lastName: merchant.contactLastName,
         email: merchant.contactEmail,
         phone: merchant.contactPhone,
         approved: merchant.approved,

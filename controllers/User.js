@@ -1,31 +1,36 @@
 const rdmString = require('randomstring');
 const token = require('token');
+
 const {
   UniqueConstraintError,
   ValidationError,
 } = require('sequelize');
 const db = require('../db/index');
 const validator = require('../validator/UserValidator');
+const merchantValidator = require('../validator/MerchantValidator');
 
-exports.validateMarchant = async (req, res) => {
-  const merchantId = req.body.id;
-  console.log(merchantId);
+exports.validateOrInvalidateMerchant = async (req, res) => {
+  const { isApproved } = req.body;
+  const { id: merchantId } = req.params;
+
   if (!merchantId) {
-    return res.status(422)
-      .json();
+    return res.sendStatus(422);
+  }
+
+  const merchantToApprove = await db.Merchant.findOne({ where: { id: merchantId } });
+  if (!merchantToApprove) {
+    return res.sendStatus(404);
+  }
+
+  if (!isApproved) {
+    const merchantUpdated = await merchantToApprove.update({
+      approved: false,
+    });
+    return res.status(200).json(merchantUpdated);
   }
 
   const secret = rdmString.generate();
   token.defaults.secret = secret;
-
-  const merchantToApprove = await db.Merchant.findOne({ where: { id: merchantId } });
-
-  console.log(merchantToApprove);
-
-  if (!merchantToApprove) {
-    return res.status(404)
-      .json();
-  }
 
   const credentials = await db.Credential.create({
     clientSecret: secret,
@@ -34,8 +39,7 @@ exports.validateMarchant = async (req, res) => {
   });
 
   if (!credentials) {
-    return res.status(404)
-      .json();
+    return res.sendStatus(404);
   }
 
   merchantToApprove.update({
@@ -44,13 +48,18 @@ exports.validateMarchant = async (req, res) => {
   });
 
   if (!merchantToApprove) {
-    return res.status(404)
-      .json();
+    return res.sendStatus(404);
   }
-  return res.status(200)
-    .json({
-      approved: true,
-    });
+  return res.status(200).json(merchantToApprove);
+};
+
+exports.getOneMerchant = async (req, res) => {
+  const { id } = req.params;
+  const merchant = await db.Merchant.findOne({ where: { id } });
+  if (!merchant) {
+    return res.sendStatus(404);
+  }
+  return res.status(200).json(merchant);
 };
 
 exports.getMerchants = async (req, res) => {
@@ -65,6 +74,7 @@ exports.getMerchants = async (req, res) => {
       companyName,
       contactPhone,
       currency,
+      kbis,
       confirmationRedirectUrl,
       cancellationRedirectUrl,
     } = merchant.dataValues;
@@ -76,6 +86,7 @@ exports.getMerchants = async (req, res) => {
       companyName,
       contactPhone,
       currency,
+      kbis,
       confirmationRedirectUrl,
       cancellationRedirectUrl,
     };
@@ -99,37 +110,62 @@ exports.getOperations = async (req, res) => {
 };
 
 exports.updateMerchantAccount = async (req, res) => {
-  const merchantId = req.body.id;
+  const { id: merchantId } = req.params;
+  const { approved, ...merchantData } = req.body;
+
   if (!merchantId) {
-    return res.status(422)
-      .json();
+    return res.sendStatus(422);
+  }
+
+  if (merchantData.email && !merchantValidator.validateEmail(merchantData.email)) {
+
+    return res.sendStatus(422);
+  }
+
+  if (merchantData.password && !merchantValidator.validatePassword(merchantData.password)) {
+    return res.sendStatus(422);
+  }
+
+  if (merchantData.companyName && !merchantValidator.validateSociety(merchantData.companyName)) {
+    return res.sendStatus(422);
+  }
+
+  if (merchantData.contactPhone && !merchantValidator.validatePhoneNumber(merchantData.contactPhone)) {
+    return res.sendStatus(422);
+  }
+
+  if (merchantData.currency && !merchantValidator.validateCurrency(merchantData.currency)) {
+    return res.sendStatus(422);
+  }
+
+  if (merchantData.confirmationRedirectUrl && !merchantValidator.validateConfirmationUrl(merchantData.confirmationRedirectUrl)) {
+    return res.sendStatus(422);
+  }
+
+  if (merchantData.cancellationRedirectUrl && !merchantValidator.validateRejectUrl(merchantData.cancellationRedirectUrl)) {
+    return res.sendStatus(422);
+  }
+
+  if (merchantData.kbis && !merchantValidator.validateKbis(merchantData.kbis)) {
+    return res.sendStatus(422);
+  }
+
+  if (merchantData.domain && !merchantValidator.validateDomain(merchantData.domain)) {
+    return res.sendStatus(422);
   }
 
   const merchantToUpdate = await db.Merchant.findOne({ where: { id: merchantId } });
   if (!merchantToUpdate) {
-    return res.status(404)
-      .json();
+    return res.sendStatus(404);
   }
 
   const updatedMerchant = await merchantToUpdate.update(req.body, { where: { id: merchantId } });
+
   if (!updatedMerchant) {
-    return res.status(404)
-      .json();
+    return res.sendStatus(404);
   }
 
-  return res.status(200)
-    .json({
-      contactEmail: req.body.contactEmail,
-      password: req.body.password,
-      contactLastName: req.body.contactLastName,
-      contactFirstName: req.body.contactFirstName,
-      companyName: req.body.companyName,
-      kbis: req.body.kbis,
-      contactPhone: req.body.contactPhone,
-      currency: req.body.currency,
-      confirmationRedirectUrl: req.body.confirmationRedirectUrl,
-      cancellationRedirectUrl: req.body.cancellationRedirectUrl,
-    });
+  return res.status(200).json(updatedMerchant);
 };
 
 exports.create = async (req, res) => {
@@ -137,8 +173,7 @@ exports.create = async (req, res) => {
     || !validator.validatePassword(req.body.password)
     || !validator.validateLastname(req.body.lastname)
     || !validator.validateFirstname(req.body.firstname)) {
-    return res.status(422)
-      .json();
+    return res.sendStatus(422);
   }
   const merchantData = { ...req.body };
 
@@ -168,22 +203,20 @@ exports.create = async (req, res) => {
       });
 
       if (userCreated) {
-        return res.status(201)
-          .json({
-            email: userCreated.email,
-          });
+        return res.status(201).json(userCreated);
       }
     } catch (e) {
       if (e instanceof UniqueConstraintError) {
-        return res.status(409)
-          .json();
+        return res.sendStatus(409);
       }
       if (e instanceof ValidationError) {
-        return res.status(422)
-          .json();
+        return res.sendStatus(422);
       }
+      console.log(e);
+      return res.sendStatus(500);
     }
   }
+
   try {
     const userCreated = await db.User.create({
       email: req.body.email,
@@ -192,25 +225,17 @@ exports.create = async (req, res) => {
       firstname: req.body.firstname,
     });
     if (userCreated) {
-      return res.status(201)
-        .json({
-          data: {
-            email: userCreated.email,
-          },
-        });
+      return res.status(212).json(userCreated);
     }
   } catch (e) {
     if (e instanceof UniqueConstraintError) {
-      return res.status(409)
-        .json();
+      return res.sendStatus(409);
     }
     if (e instanceof ValidationError) {
-      return res.status(422)
-        .json();
+      return res.sendStatus(422);
     }
   }
-  return res.status(500)
-    .json();
+  return res.sendStatus(500);
 };
 
 exports.login = async (req, res) => {
