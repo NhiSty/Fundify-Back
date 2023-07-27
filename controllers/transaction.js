@@ -13,7 +13,7 @@ exports.createTransaction = async (req, res, next) => {
   }
 
   try {
-    authorize(req, res, merchantId);
+   // authorize(req, res, merchantId);
 
     if (!userId) {
       throw new Error('422 Unprocessable Entity');

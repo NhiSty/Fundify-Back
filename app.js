@@ -16,8 +16,13 @@ const webhooks = require('./routes/webhook');
 app.set('view engine', 'ejs');
 const userRoutes = require('./routes/user');
 
+app.set('view engine', 'ejs');
+
 app.use(bodyParser.json({ limit: '5mb' }));
-app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
+app.use(bodyParser.urlencoded({
+  extended: true,
+  limit: '5mb',
+}));
 app.use(cors(
   {
     origin: [
@@ -63,6 +68,7 @@ app.use('/api/auth', userRoutes.logout);
 app.use('/api', transactionRoutes.createTransaction);
 app.use('/api', merchantRoutes.getMerchantTransactions);
 app.use('/api', operationRoutes.createOperation);
+app.use('/api/auth', userRoutes.create);
 
 app.use(errorHandler);
 

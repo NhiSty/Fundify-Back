@@ -1,13 +1,13 @@
-require('dotenv').config();
+require('dotenv')
+  .config();
 
 exports.verifications = async (req, res) => {
   const {
-    amount, currency, transactionId, operationId,
+    amount,
+    currency,
+    transactionId,
+    operationId,
   } = req.body;
-
-  console.log({
-    amount, currency, transactionId, operationId,
-  });
 
   res.sendStatus(200);
 
@@ -24,9 +24,9 @@ exports.verifications = async (req, res) => {
 };
 
 function sendDoneNotification(body) {
-  const url = 'http://node:1337/api/operation/webhook';
+  const { notificationUrl } = body;
 
-  fetch(url, {
+  fetch(notificationUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
