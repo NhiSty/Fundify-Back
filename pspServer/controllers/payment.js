@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 exports.verifications = async (req, res) => {
   const {
     amount, currency, transactionId, operationId,
@@ -28,6 +30,7 @@ function sendDoneNotification(body) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'x-api-key': process.env.API_SECRET_KEY,
     },
     body: JSON.stringify(body),
   })

@@ -41,16 +41,23 @@ exports.getMerchants = async (req, res) => {
     });
 };
 
-exports.getMerchantTransactionById = async (req, res) => {
+// eslint-disable-next-line consistent-return
+exports.getMerchantTransactionById = async (req, res, next) => {
   const { id, transactionId } = req.params;
 
-  if (!id || !transactionId) {
-    return res.sendStatus(404);
-  }
+  try {
+    authorize(req, res, id);
 
-  const transactions = await TransactionMDb.aggregate([{ $match: { $and: [{ transactionId }, { merchantId: id }] } }]).exec();
-  return res.status(200)
-    .json(transactions);
+    if (!id || !transactionId) {
+      return res.sendStatus(404);
+    }
+
+    const transactions = await TransactionMDb.aggregate([{ $match: { $and: [{ transactionId }, { merchantId: id }] } }]).exec();
+    return res.status(200)
+      .json(transactions);
+  } catch (err) {
+    next(err);
+  }
 };
 
 // eslint-disable-next-line consistent-return
@@ -169,14 +176,12 @@ exports.login = async (req, res) => {
   try {
     const merchand = await db.findOne({ where: { contactEmail: req.body.contactEmail } });
     if (!merchand) {
-      return res.status(404)
-        .json();
+      return res.sendStatus(401);
     }
     const valid = await merchand.checkPassword(req.body.password);
 
     if (!valid) {
-      return res.status(401)
-        .json();
+      return res.sendStatus(401);
     }
 
     const sign = merchand.generateToken();
@@ -205,6 +210,8 @@ exports.getMerchantTransactions = async (req, res, next) => {
   const merchantId = req.params.id;
 
   try {
+    authorize(req, res, merchantId);
+
     if (!merchantId) {
       throw new Error('422 Unprocessable Entity');
     }
@@ -230,68 +237,77 @@ exports.getMerchantTransactions = async (req, res, next) => {
   }
 };
 
-exports.updateMerchantAccount = async (req, res) => {
+// eslint-disable-next-line consistent-return
+exports.updateMerchantAccount = async (req, res, next) => {
   const { id: merchantId } = req.params;
   const { approved, ...merchantData } = req.body;
 
-  if (!merchantId) {
-    return res.sendStatus(422);
+  try {
+    authorize(req, res, merchantId);
+
+    if (!merchantId) {
+      return res.sendStatus(422);
+    }
+
+    if (merchantData.email && !merchantValidator.validateEmail(merchantData.email)) {
+      return res.sendStatus(422);
+    }
+
+    if (merchantData.password && !merchantValidator.validatePassword(merchantData.password)) {
+      return res.sendStatus(422);
+    }
+
+    if (merchantData.companyName && !merchantValidator.validateSociety(merchantData.companyName)) {
+      return res.sendStatus(422);
+    }
+
+    if (merchantData.contactPhone && !merchantValidator.validatePhoneNumber(merchantData.contactPhone)) {
+      return res.sendStatus(422);
+    }
+
+    if (merchantData.currency && !merchantValidator.validateCurrency(merchantData.currency)) {
+      return res.sendStatus(422);
+    }
+
+    if (merchantData.confirmationRedirectUrl && !merchantValidator.validateConfirmationUrl(merchantData.confirmationRedirectUrl)) {
+      return res.sendStatus(422);
+    }
+
+    if (merchantData.cancellationRedirectUrl && !merchantValidator.validateRejectUrl(merchantData.cancellationRedirectUrl)) {
+      return res.sendStatus(422);
+    }
+
+    if (merchantData.kbis && !merchantValidator.validateKbis(merchantData.kbis)) {
+      return res.sendStatus(422);
+    }
+
+    if (merchantData.domain && !merchantValidator.validateDomain(merchantData.domain)) {
+      return res.sendStatus(422);
+    }
+
+    const merchantToUpdate = await db.Merchant.findOne({ where: { id: merchantId } });
+    if (!merchantToUpdate) {
+      return res.sendStatus(404);
+    }
+
+    const updatedMerchant = await merchantToUpdate.update(req.body, { where: { id: merchantId } });
+
+    if (!updatedMerchant) {
+      return res.sendStatus(404);
+    }
+
+    return res.status(200).json(updatedMerchant);
+  } catch (e) {
+    next(e);
   }
-
-  if (merchantData.email && !merchantValidator.validateEmail(merchantData.email)) {
-    return res.sendStatus(422);
-  }
-
-  if (merchantData.password && !merchantValidator.validatePassword(merchantData.password)) {
-    return res.sendStatus(422);
-  }
-
-  if (merchantData.companyName && !merchantValidator.validateSociety(merchantData.companyName)) {
-    return res.sendStatus(422);
-  }
-
-  if (merchantData.contactPhone && !merchantValidator.validatePhoneNumber(merchantData.contactPhone)) {
-    return res.sendStatus(422);
-  }
-
-  if (merchantData.currency && !merchantValidator.validateCurrency(merchantData.currency)) {
-    return res.sendStatus(422);
-  }
-
-  if (merchantData.confirmationRedirectUrl && !merchantValidator.validateConfirmationUrl(merchantData.confirmationRedirectUrl)) {
-    return res.sendStatus(422);
-  }
-
-  if (merchantData.cancellationRedirectUrl && !merchantValidator.validateRejectUrl(merchantData.cancellationRedirectUrl)) {
-    return res.sendStatus(422);
-  }
-
-  if (merchantData.kbis && !merchantValidator.validateKbis(merchantData.kbis)) {
-    return res.sendStatus(422);
-  }
-
-  if (merchantData.domain && !merchantValidator.validateDomain(merchantData.domain)) {
-    return res.sendStatus(422);
-  }
-
-  const merchantToUpdate = await db.Merchant.findOne({ where: { id: merchantId } });
-  if (!merchantToUpdate) {
-    return res.sendStatus(404);
-  }
-
-  const updatedMerchant = await merchantToUpdate.update(req.body, { where: { id: merchantId } });
-
-  if (!updatedMerchant) {
-    return res.sendStatus(404);
-  }
-
-  return res.status(200).json(updatedMerchant);
 };
 
 // eslint-disable-next-line consistent-return
 exports.getMerchantAccount = async (req, res, next) => {
   const merchantId = req.params.id;
   try {
+    authorize(req, res, merchantId);
+
     if (req.role !== 'user') {
       if (parseInt(req.merchantId, 10) !== parseInt(merchantId, 10)) {
         throw new Error('401 Unauthorized');

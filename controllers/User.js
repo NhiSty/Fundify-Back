@@ -131,8 +131,7 @@ exports.login = async (req, res) => {
   try {
     const user = await db.User.findOne({ where: { email: req.body.email } });
     if (!user) {
-      return res.status(404)
-        .json();
+      return res.status(401).json();
     }
     const valid = await user.checkPassword(req.body.password);
 

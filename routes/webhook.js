@@ -1,9 +1,11 @@
 const express = require('express');
 const operationCtrl = require('../controllers/operation');
+const { verifyApiKey } = require('../middleware/verifyPSPSecretKey');
+require('dotenv').config();
 
 const router = express.Router();
 
-router.post('/operation/webhook', async (req, res) => {
+router.post('/operation/webhook', verifyApiKey, async (req, res) => {
   const data = req.body;
 
   try {

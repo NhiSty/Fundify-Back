@@ -27,9 +27,6 @@ module.exports = async (req, res, next) => {
       throw new Error('401 Unauthorized');
     }
 
-    console.info('isAdmin:', isAdmin);
-    console.info('id:', id);
-
     if (id && isAdmin === true) {
       req.role = 'user';
       req.userId = id;
@@ -37,7 +34,7 @@ module.exports = async (req, res, next) => {
       req.isAdmin = isAdmin;
     } else if (id && merchantId !== null) {
       const merchant = await db.Merchant.findByPk(merchantId);
-      if (merchant.approved === true) {
+      if (merchant && merchant.approved === true) {
         req.role = 'merchant';
         req.userId = id;
         req.merchantId = merchantId;
@@ -54,9 +51,6 @@ module.exports = async (req, res, next) => {
       req.merchantId = null;
       req.isAdmin = isAdmin;
     }
-    console.log('Role:', req.role);
-    console.log('UserId:', req.userId);
-    console.log('MerchantId:', req.merchantId);
 
     next();
   } catch (error) {
