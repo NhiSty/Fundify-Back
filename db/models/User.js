@@ -1,4 +1,7 @@
-const { Model, DataTypes } = require('sequelize');
+const {
+  Model,
+  DataTypes,
+} = require('sequelize');
 
 // eslint-disable-next-line func-names
 module.exports = function (connection) {
@@ -12,7 +15,11 @@ module.exports = function (connection) {
     generateToken() {
       // eslint-disable-next-line global-require
       const jwt = require('jsonwebtoken');
-      return jwt.sign({ id: this.id, merchantId: this.merchantId }, process.env.JWT_SECRET, {
+      return jwt.sign({
+        id: this.id,
+        merchantId: this.merchantId,
+        isAdmin: this.isAdmin,
+      }, process.env.JWT_SECRET, {
         expiresIn: '1y',
       });
     }
@@ -48,6 +55,11 @@ module.exports = function (connection) {
           model: 'Merchants',
           key: 'id',
         },
+      },
+      isAdmin: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
       },
     },
     {

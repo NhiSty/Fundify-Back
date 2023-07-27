@@ -11,35 +11,35 @@ module.exports = async (req, res, next) => {
     const {
       id,
       merchantId,
+      isAdmin,
     } = decodedToken;
 
-    if (merchantId && id) {
-      req.userId = merchantId;
-      req.merchantId = merchantId;
-      req.role = 'merchant';
-      return next();
-    }
-    if (id && !merchantId && req.hostname === process.env.DOMAIN_HOST) {
-      console.log('auth merchant id :', merchantId);
-      console.log('auth user id :', id);
-      req.userId = id;
-      req.role = 'user';
-      return next();
-    }
-
-    if (merchantId) {
-      const merchant = await db.Merchant.findByPk(merchantId);
-      if (merchant) {
-        if (id && merchant.approved === false) {
-          req.userId = id;
-          req.role = 'not-merchant';
-        }
-      }
-      return next();
-    }
     if (!id) {
       throw new Error('401 Unauthorized');
     }
+
+    console.info('isAdmin:', isAdmin);
+    console.info('id:', id);
+
+    if (id && isAdmin === true) {
+      req.role = 'user';
+      req.userId = id;
+      req.merchantId = merchantId;
+    } else if (id && merchantId !== null) {
+      const merchant = await db.Merchant.findByPk(merchantId);
+      if (merchant.approved === true) {
+        req.role = 'merchant';
+        req.userId = id;
+        req.merchantId = merchantId;
+      } else {
+        req.role = 'not-merchant';
+        req.userId = id;
+        req.merchantId = merchantId;
+      }
+    }
+    console.log('Role:', req.role);
+    console.log('UserId:', req.userId);
+    console.log('MerchantId:', req.merchantId);
 
     next();
   } catch (error) {
