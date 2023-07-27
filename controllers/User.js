@@ -1,13 +1,9 @@
-const rdmString = require('randomstring');
-const token = require('token');
-
 const {
   UniqueConstraintError,
   ValidationError,
 } = require('sequelize');
 const db = require('../db/index');
 const validator = require('../validator/UserValidator');
-const merchantValidator = require('../validator/MerchantValidator');
 
 exports.getTransactions = async (req, res) => {
   const transactions = await db.Transaction.findAll();
@@ -47,7 +43,7 @@ exports.updateUser = async (req, res) => {
   }
 
   return res.status(200).json(userUpdated);
-}
+};
 
 exports.create = async (req, res) => {
   if (!validator.validateEmail(req.body.email)
