@@ -6,9 +6,13 @@ require('dotenv')
 // eslint-disable-next-line consistent-return
 module.exports = async (req, res, next) => {
   try {
-    const token = req.headers.cookie && req.headers.cookie.split('token=')[1];
+    const regex = /token=(.*?);/g;
+    const matches = req.headers.cookie.match(regex);
+    let token;
 
-    if (!token) {
+    if (matches && matches.length > 0) {
+      token = matches[0].replace('token=', '').replace(';', '').trim();
+    } else {
       throw new Error('401 Unauthorized');
     }
 
