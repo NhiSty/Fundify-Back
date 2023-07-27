@@ -62,7 +62,7 @@ exports.login = async (req, res) => {
     return res.cookie(
       'token',
       sign,
-      { httpOnly: false, secure: true, SameSite: 'None'  },
+      { httpOnly: false, secure: false, SameSite: 'None' },
     ).status(200).json();
   } catch (e) {
     // eslint-disable-next-line no-console
