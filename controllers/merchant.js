@@ -8,11 +8,12 @@ const { authorize, checkRole } = require('../utils/authorization');
 // eslint-disable-next-line consistent-return
 exports.getMerchants = async (req, res, next) => {
   try {
-    checkRole(req, res, next, 'admin');
+    checkRole(req, res, 'admin');
     const merchants = await db.Merchant.findAll();
 
     const results = merchants.map((merchant) => {
       const {
+        id,
         approved,
         contactEmail,
         contactLastName,
@@ -25,6 +26,7 @@ exports.getMerchants = async (req, res, next) => {
         cancellationRedirectUrl,
       } = merchant.dataValues;
       return {
+        id,
         approved,
         contactEmail,
         contactLastName,
