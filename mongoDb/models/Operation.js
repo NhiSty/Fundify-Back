@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const operationSchema = new mongoose.Schema({
   operationId: {
-    type: Number,
+    type: String,
     required: true,
     unique: true,
   },

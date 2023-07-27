@@ -2,22 +2,22 @@ const mongoose = require('mongoose');
 
 const transactionSchema = new mongoose.Schema({
   transactionId: {
-    type: Number,
+    type: String,
     required: true,
     unique: true,
   },
   merchantId: {
-    type: Number,
+    type: String,
     required: true,
   },
   userId: {
-    type: Number,
+    type: String,
     required: true,
   },
   operations: [
     {
       operationId: {
-        type: Number,
+        type: String,
         required: true,
       },
       type: {
