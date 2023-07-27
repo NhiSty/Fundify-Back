@@ -6,19 +6,31 @@ require('dotenv')
 // eslint-disable-next-line consistent-return
 module.exports = async (req, res, next) => {
   try {
-    const hasSemicolon = req.headers.cookie && req.headers.cookie.includes(';');
+    // const hasSemicolon = req.headers.cookie && req.headers.cookie.includes(';');
     const { cookie } = req.headers;
-    const regex = /token=(.*);/g;
+    // const regex = /token=(.*);/g;
+    const regex = /token=([^;]*)/;
+
     const matches = cookie && cookie.match(regex);
     let token;
 
-    if (hasSemicolon && matches && matches.length > 0) {
-      token = matches[0].replace('token=', '').replace(';', '').trim();
-    } else if (cookie && cookie.includes('token=')) {
-      token = cookie.replace('token=', '').trim();
+    if (matches && matches.length > 0) {
+      token = matches[1].trim();
     } else {
       throw new Error('401 Unauthorized');
     }
+    /*
+    if (hasSemicolon && matches && matches.length > 0) {
+      token = matches[0].replace('token=', '').replace(';', '').trim();
+      console.log('1 -->', token);
+    } else if (cookie && cookie.includes('token=')) {
+      token = cookie.replace('token=', '').trim();
+      console.log('2 -->', token);
+    } else {
+      throw new Error('401 Unauthorized');
+    }
+
+     */
 
     const decodedToken = jsonwebtoken.verify(token, `${process.env.JWT_SECRET}`);
     const {

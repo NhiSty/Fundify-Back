@@ -10,7 +10,7 @@ exports.authorize = (req, res, merchantId) => {
   }
 };
 
-exports.checkRole = (req, res, next, role) => {
+exports.checkRole = (req, res, role) => {
   const { role: reqRole } = req;
 
   if (reqRole !== role) {
