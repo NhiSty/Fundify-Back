@@ -1,6 +1,7 @@
 const db = require('../db/index');
 const OperationValidator = require('../validator/OperationValidator');
 const TransactionMDb = require('../mongoDb/models/Transaction');
+require('dotenv').config();
 
 exports.createOperation = async (req, res) => {
   const { transactionId } = req.body;
@@ -50,6 +51,7 @@ exports.createOperation = async (req, res) => {
         currency: transaction.currency,
         operationId: operation.id,
         transactionId: transaction.id,
+        notificationUrl: process.env.URL_NOTIF_PSP,
       }),
     });
 
