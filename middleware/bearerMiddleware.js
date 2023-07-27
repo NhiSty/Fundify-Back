@@ -1,10 +1,16 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 const db = require('../db');
+require('dotenv')
+  .config();
 
 // eslint-disable-next-line consistent-return
 module.exports = async (req, res, next) => {
-  console.log(req.headers.bearer, 'bearer');
   if (req.role === 'admin') {
+    return next();
+  }
+
+  // @TODO remove this if statement when testing is complete
+  if (req.hostname === process.env.DOMAIN_NAME) {
     return next();
   }
 

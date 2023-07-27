@@ -12,13 +12,14 @@ module.exports = function (connection) {
       return bcrypt.compare(password, this.password);
     }
 
-    generateToken() {
+    generateToken(approved) {
       // eslint-disable-next-line global-require
       const jwt = require('jsonwebtoken');
       return jwt.sign({
         id: this.id,
         merchantId: this.merchantId,
         isAdmin: this.isAdmin,
+        approved,
       }, process.env.JWT_SECRET, {
         expiresIn: '1y',
       });

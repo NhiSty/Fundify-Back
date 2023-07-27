@@ -4,7 +4,7 @@ exports.authorize = (req, res, merchantId) => {
   } = req;
 
   if (!isAdmin) {
-    if (parseInt(reqMerchantId, 10) !== parseInt(merchantId, 10)) {
+    if (reqMerchantId !== merchantId) {
       throw new Error('403 Forbidden');
     }
   }
