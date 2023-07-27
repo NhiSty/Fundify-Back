@@ -12,7 +12,7 @@
 
 ### 🏠 [Homepage](https://github.com/NhiSty/Fundify-Back#readme)
 
-### ✨ [Demo](https://test.com)
+### ✨ [Demo](https://api.fundify.shop)
 
 ## Prerequisites
 

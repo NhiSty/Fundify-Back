@@ -1,3 +1,5 @@
+const data = require('../currency_data.json');
+
 module.exports = {
   validateAmount: (amount) => {
     if (!amount || amount === '' || typeof (amount) !== 'number') {
@@ -10,7 +12,20 @@ module.exports = {
     return validStatusValues.includes(status);
   },
   validateCurrency: (currency) => {
-    if (!currency || currency === '' || typeof (currency) !== 'string') {
+    let uniqueCurrencies = new Set();
+
+    for (let entry in data) {
+      if (entry.includes('/')) {
+        let currencies = entry.split('/');
+        for (let currency of currencies) {
+          uniqueCurrencies.add(currency);
+        }
+      }
+    }
+    const currencies = Array.from(uniqueCurrencies);
+    console.log(currencies)
+    // If the currency is not in the list of supported currencies, return false
+    if (!currencies.includes(currency)) {
       return false;
     }
     return /^[A-Z]{3}$/.test(currency);
