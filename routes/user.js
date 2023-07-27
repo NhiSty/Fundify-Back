@@ -2,16 +2,16 @@ const express = require('express');
 
 const router = express.Router();
 
-const adminCtrl = require('../controllers/User');
+const userCtrl = require('../controllers/User');
 
 module.exports = {
-  validateMerchant: router.put('/merchant', adminCtrl.validateMarchant),
-  getMerchants: router.get('/merchants', adminCtrl.getMerchants),
-  getTransactions: router.get('/transactions', adminCtrl.getTransactions),
-  getOperations: router.get('/operations', adminCtrl.getOperations),
-  updateMerchantAccount: router.put('/merchant/update', adminCtrl.updateMerchantAccount),
-  create: router.post('/create', adminCtrl.create),
-  login: router.post('/login', adminCtrl.login),
-  logout: router.get('/logout', adminCtrl.logout),
-  setAdmin: router.put('/user/setAdmin', adminCtrl.setAdmin),
+  validateOrInvalidateMerchant: router.patch('/merchants/:id', userCtrl.validateOrInvalidateMerchant),
+  getMerchants: router.get('/merchants', userCtrl.getMerchants),
+  getOneMerchant: router.get('/merchants/:id', userCtrl.getOneMerchant),
+  getTransactions: router.get('/transactions', userCtrl.getTransactions),
+  updateMerchantAccount: router.put('/merchants/:id', userCtrl.updateMerchantAccount),
+  create: router.post('/users', userCtrl.create),
+  login: router.post('/users/login', userCtrl.login),
+  logout: router.get('/users/logout', userCtrl.logout),
+  setAdmin: router.patch('/users', userCtrl.setAdmin),
 };

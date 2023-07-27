@@ -65,4 +65,10 @@ module.exports = {
     }
     return true;
   },
+  validateDomain: (domain) => {
+    if (!domain || domain === '' || typeof (domain) !== 'string') {
+      return false;
+    }
+    return true;
+  },
 };
