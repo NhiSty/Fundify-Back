@@ -20,7 +20,7 @@ exports.verifications = async (req, res) => {
       transactionId,
       operationId,
     });
-  }, 30000);
+  }, 10000);
 };
 
 function sendDoneNotification(body) {

@@ -50,7 +50,7 @@ exports.getAllTransactions = async (req, res, next) => {
   try {
     checkRole(req, res, 'admin');
 
-    const transactions = await TransactionMDb.findAll();
+    const transactions = await TransactionMDb.find({});
     return res.status(200).json(transactions);
   } catch (error) {
     next(error);
@@ -93,7 +93,7 @@ exports.getMerchantTransactions = async (req, res, next) => {
       return res.status(404).json();
     }
 
-    const transactions = await TransactionMDb.findAll({ where: { merchantId } });
+    const transactions = await TransactionMDb.find({ where: { merchantId } });
     return res.status(200).json(transactions);
   } catch (error) {
     next(error);
