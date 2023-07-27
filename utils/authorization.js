@@ -13,10 +13,7 @@ exports.authorize = (req, res, merchantId) => {
 exports.checkRole = (req, res, next, role) => {
   const { role: reqRole } = req;
 
-  console.log('--->', reqRole, role, '<---');
-
   if (reqRole !== role) {
     throw new Error('403 Forbidden');
   }
-  next();
 };

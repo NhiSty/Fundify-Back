@@ -7,6 +7,11 @@ const MerchantMongo = require('../../mongoDb/models/Merchant');
 module.exports = function (connection) {
   class Merchant extends Model {}
   Merchant.init({
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
     companyName: {
       type: DataTypes.STRING,
       allowNull: false,

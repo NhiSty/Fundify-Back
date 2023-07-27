@@ -27,6 +27,11 @@ module.exports = function (connection) {
 
   User.init(
     {
+      id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true,
+      },
       lastname: DataTypes.STRING,
       firstname: DataTypes.STRING,
       email: {
@@ -50,7 +55,7 @@ module.exports = function (connection) {
         },
       },
       merchantId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         references: {
           model: 'Merchants',
           key: 'id',

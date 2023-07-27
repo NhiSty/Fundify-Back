@@ -61,4 +61,4 @@ module.exports = async (req, res, next) => {
     console.log('Error:', error.message);
     next(error);
   }
-}
+};
