@@ -3,41 +3,47 @@ const token = require('token');
 const db = require('../db/index');
 const merchantValidator = require('../validator/MerchantValidator');
 const TransactionMDb = require('../mongoDb/models/Transaction');
-const { authorize } = require('../utils/authorization');
+const { authorize, checkRole } = require('../utils/authorization');
 
-exports.getMerchants = async (req, res) => {
-  const merchants = await db.Merchant.findAll();
+// eslint-disable-next-line consistent-return
+exports.getMerchants = async (req, res, next) => {
+  try {
+    checkRole(req, res, next, 'admin');
+    const merchants = await db.Merchant.findAll();
 
-  const results = merchants.map((merchant) => {
-    const {
-      approved,
-      contactEmail,
-      contactLastName,
-      contactFirstName,
-      companyName,
-      contactPhone,
-      currency,
-      kbis,
-      confirmationRedirectUrl,
-      cancellationRedirectUrl,
-    } = merchant.dataValues;
-    return {
-      approved,
-      contactEmail,
-      contactLastName,
-      contactFirstName,
-      companyName,
-      contactPhone,
-      currency,
-      kbis,
-      confirmationRedirectUrl,
-      cancellationRedirectUrl,
-    };
-  });
-  return res.status(200)
-    .json({
-      merchants: results,
+    const results = merchants.map((merchant) => {
+      const {
+        approved,
+        contactEmail,
+        contactLastName,
+        contactFirstName,
+        companyName,
+        contactPhone,
+        currency,
+        kbis,
+        confirmationRedirectUrl,
+        cancellationRedirectUrl,
+      } = merchant.dataValues;
+      return {
+        approved,
+        contactEmail,
+        contactLastName,
+        contactFirstName,
+        companyName,
+        contactPhone,
+        currency,
+        kbis,
+        confirmationRedirectUrl,
+        cancellationRedirectUrl,
+      };
     });
+    return res.status(200)
+      .json({
+        merchants: results,
+      });
+  } catch (err) {
+    next(err);
+  }
 };
 
 // eslint-disable-next-line consistent-return
@@ -65,7 +71,7 @@ exports.validateOrInvalidateMerchant = async (req, res, next) => {
   const { id: merchantId } = req.params;
 
   try {
-    authorize(req, res, merchantId);
+    checkRole(req, res, next, 'admin');
 
     if (!merchantId) {
       throw new Error('422 Unprocessable Entity');

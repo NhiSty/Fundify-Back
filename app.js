@@ -50,14 +50,16 @@ app.use('/api', webhooks);
 app.use('/api', operationRoutes.getTransactionOperations);
 app.use('/api', merchantRoutes.getMerchantTransactionById);
 app.use('/api', merchantRoutes.getMerchant);
-app.use('/api', merchantRoutes.getAllMerchants);
-app.use('/api', merchantRoutes.validateOrInvalidateMerchant);
 app.use('/api', merchantRoutes.updateMerchantAccount);
 app.use('/api', transactionRoutes.getTransaction);
-app.use('/api', transactionRoutes.getAllTransactions);
-app.use('/api', userRoutes.setAdmin);
 app.use('/api', userRoutes.updateUser);
 app.use('/api/auth', userRoutes.logout);
+
+// Routes protégées par le middleware d'authentification (seulement) et admin
+app.use('/api', merchantRoutes.getAllMerchants);
+app.use('/api', merchantRoutes.validateOrInvalidateMerchant);
+app.use('/api', transactionRoutes.getAllTransactions);
+app.use('/api', userRoutes.setAdmin);
 app.use('/api', userRoutes.getUsers);
 
 // Routes protégées par middleware de vérification du Bearer Token (seulement)

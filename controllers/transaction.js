@@ -2,7 +2,7 @@ const db = require('../db/index');
 const TransactionMDb = require('../mongoDb/models/Transaction');
 
 const TransactionValidator = require('../validator/TransactionValidator');
-const { authorize } = require('../utils/authorization');
+const { authorize, checkRole} = require('../utils/authorization');
 
 // eslint-disable-next-line consistent-return
 exports.createTransaction = async (req, res, next) => {
@@ -45,9 +45,16 @@ exports.createTransaction = async (req, res, next) => {
   }
 };
 
-exports.getAllTransactions = async (req, res) => {
-  const transactions = await TransactionMDb.findAll();
-  return res.status(200).json(transactions);
+// eslint-disable-next-line consistent-return
+exports.getAllTransactions = async (req, res, next) => {
+  try {
+    checkRole(req, res, next, 'admin');
+
+    const transactions = await TransactionMDb.findAll();
+    return res.status(200).json(transactions);
+  } catch (error) {
+    next(error);
+  }
 };
 
 // eslint-disable-next-line consistent-return

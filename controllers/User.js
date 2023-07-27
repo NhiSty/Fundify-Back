@@ -4,10 +4,18 @@ const {
 } = require('sequelize');
 const db = require('../db/index');
 const validator = require('../validator/UserValidator');
+const { checkRole } = require('../utils/authorization');
 
-exports.getUsers = async (req, res) => {
-  const users = await db.User.findAll({ where: { merchantId: null } });
-  return res.status(200).json(users);
+// eslint-disable-next-line consistent-return
+exports.getUsers = async (req, res, next) => {
+  try {
+    checkRole(req, res, next, 'admin');
+
+    const users = await db.User.findAll({ where: { merchantId: null } });
+    return res.status(200).json(users);
+  } catch (error) {
+    next(error);
+  }
 };
 
 exports.updateUser = async (req, res) => {
@@ -150,29 +158,32 @@ exports.login = async (req, res) => {
     .json();
 };
 
-exports.setAdmin = async (req, res) => {
+// eslint-disable-next-line consistent-return
+exports.setAdmin = async (req, res, next) => {
   const { userId } = req.body;
 
-  if (!userId) {
-    return res.status(422)
-      .json();
+  try {
+    checkRole(req, res, next, 'admin');
+
+    if (!userId) {
+      return res.sendStatus(422);
+    }
+
+    const userToUpdate = await db.User.findOne({ where: { id: userId } });
+    if (!userToUpdate) {
+      return res.sendStatus(404);
+    }
+
+    const updatedUser = await userToUpdate.update({ isAdmin: true }, { where: { id: userId } });
+
+    if (!updatedUser) {
+      return res.sendStatus(404);
+    }
+
+    return res.sendStatus(200);
+  } catch (e) {
+    next(e);
   }
-
-  const userToUpdate = await db.User.findOne({ where: { id: userId } });
-  if (!userToUpdate) {
-    return res.status(404)
-      .json();
-  }
-
-  const updatedUser = await userToUpdate.update({ isAdmin: true }, { where: { id: userId } });
-
-  if (!updatedUser) {
-    return res.status(404)
-      .json();
-  }
-
-  return res.status(200)
-    .json();
 };
 // eslint-disable-next-line max-len
 exports.logout = async (req, res) => res.clearCookie('token')
