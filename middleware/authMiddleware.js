@@ -32,7 +32,7 @@ module.exports = async (req, res, next) => {
     }
 
     if (id && isAdmin === true) {
-      req.role = 'user';
+      req.role = 'admin';
       req.userId = id;
       req.merchantId = merchantId;
       req.isAdmin = isAdmin;

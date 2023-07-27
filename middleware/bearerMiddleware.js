@@ -4,7 +4,7 @@ const db = require('../db');
 // eslint-disable-next-line consistent-return
 module.exports = async (req, res, next) => {
   console.log(req.headers.bearer, 'bearer');
-  if (req.role === 'user') {
+  if (req.role === 'admin') {
     return next();
   }
 
