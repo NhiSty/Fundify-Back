@@ -8,16 +8,21 @@ const operationSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['TOTAL', 'PARTIAL'],
-    default: 'TOTAL',
+    enum: ['capture', 'refund'],
+    default: 'capture',
   },
-  amount: {
+  amountOperation: {
     type: Number,
     required: true,
   },
   transactionId: {
     type: Number,
     required: true,
+  },
+  status: {
+    type: String,
+    enum: ['created', 'processing', 'done', 'failed'],
+    default: 'created',
   },
 });
 

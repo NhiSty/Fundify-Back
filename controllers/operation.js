@@ -1,43 +1,66 @@
 const db = require('../db/index');
 const OperationValidator = require('../validator/OperationValidator');
+const TransactionMDb = require('../mongoDb/models/Transaction');
+require('dotenv').config();
 
 exports.createOperation = async (req, res) => {
   const { transactionId } = req.body;
 
   if (!transactionId) {
-    return res.status(422).json();
+    return res.sendStatus(422);
   }
-
-  if (req.body.type && !OperationValidator.validateType(req.body.type)) {
-    return res.status(422).json();
+  if (!await OperationValidator.validateAmount(req.body.amount, transactionId)) {
+    return res.sendStatus(422);
   }
-  if (!OperationValidator.validateAmount(req.body.amount)) {
-    return res.status(422).json();
+  if (req.body.status && !OperationValidator.validateStatus(req.body.status)) {
+    return res.sendStatus(422);
   }
 
   const transaction = await db.Transaction.findByPk(transactionId);
 
   if (!transaction) {
-    return res.status(404).json();
+    return res.sendStatus(422);
   }
 
-  const operation = await db.Operation.create(req.body);
-  return res.status(201).json(operation);
-};
+  const { type, ...restBody } = req.body;
 
-exports.getOperation = async (req, res) => {
-  const operationId = req.params.id;
+  let operation;
 
-  if (!operationId) {
-    return res.status(422).json();
+  if (transaction.status === 'created') {
+    operation = await db.Operation.create({
+      type: 'capture',
+      transactionId,
+      amount: restBody.amount,
+    });
+  } else {
+    operation = await db.Operation.create({
+      type: 'refund',
+      transactionId,
+      amount: restBody.amount,
+    });
   }
-  const operation = await db.Operation.findOne({ where: { id: operationId } });
 
-  if (!operation) {
-    return res.status(404).json();
+  try {
+    await fetch('http://psp:1338/api/psp/transactions/verifications', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        amount: restBody.amount,
+        currency: transaction.currency,
+        operationId: operation.id,
+        transactionId: transaction.id,
+        notificationUrl: process.env.URL_NOTIF_PSP,
+      }),
+    });
+
+    await operation.update({ status: 'processing' }, { where: { id: operation.id } });
+    return res.status(201).json(operation);
+  } catch (error) {
+    await operation.update({ status: 'failed' }, { where: { id: operation.id } });
+    return res.sendStatus(500);
   }
-
-  return res.status(200).json(operation);
 };
 
 exports.getTransactionOperations = async (req, res) => {
@@ -56,41 +79,39 @@ exports.getTransactionOperations = async (req, res) => {
   return res.status(200).json(operations);
 };
 
-exports.updateOperation = async (req, res) => {
-  const operationId = req.body.id;
+exports.operationWebhook = async (notificationData) => {
+  try {
+    const operation = await db.Operation.findOne({ where: { id: notificationData.operationId } });
 
-  if (req.body.type && !OperationValidator.validateType(req.body.type)) {
-    return res.status(422).json();
-  }
-  if (req.body.amount && !OperationValidator.validateAmount(req.body.amount)) {
-    return res.status(422).json();
-  }
+    if (!operation) {
+      throw new Error('Operation not found');
+    }
 
-  if (!operationId) {
-    return res.status(422).json();
-  }
+    await operation.update(
+      { status: 'done' },
+      { where: { id: notificationData.operationId } },
+    );
+    const transactionMDb = await TransactionMDb.findOne({ transactionId: notificationData.transactionId });
 
-  const operationToUpdate = await db.Operation.findOne({ where: { id: operationId } });
-  if (!operationToUpdate) {
-    return res.status(404).json();
-  }
-  const updatedOperation = await operationToUpdate.update(req.body, { where: { id: operationId } });
+    if (!transactionMDb) {
+      throw new Error('Transaction not found');
+    }
 
-  if (!updatedOperation) {
-    return res.status(404).json();
-  }
-  return res.status(200).json(updatedOperation);
-};
+    const refundAvailable = transactionMDb.refundAmountAvailable;
+    let status = 'captured';
 
-exports.deleteOperation = async (req, res) => {
-  const operationId = req.params.id;
-  if (!operationId) {
-    return res.status(422).json();
-  }
-  const deletedOperation = await db.Operation.destroy({ where: { id: operationId } });
+    if (operation.type === 'refund' && refundAvailable > 0) {
+      status = 'partial_refunded';
+    }
 
-  if (!deletedOperation) {
-    return res.status(404).json();
+    if (operation.type === 'refund' && refundAvailable === 0) {
+      status = 'refunded';
+    }
+
+    const transaction = await db.Transaction.findOne({ where: { id: notificationData.transactionId } });
+    await db.Transaction.update({ status }, { where: { id: transaction.id } });
+    await db.TransactionStatusHist.create({ status, transactionId: transaction.id });
+  } catch (error) {
+    console.log(error);
   }
-  return res.status(204).send();
 };
