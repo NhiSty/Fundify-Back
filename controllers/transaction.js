@@ -43,7 +43,7 @@ exports.createTransaction = async (req, res) => {
       const conversionRate = getCurrencyConversionRate(merchantCurrency, currency);
       convertedAmount = amount * conversionRate;
     } catch (err) {
-      return res.status(422).json({ error: err.message });
+      return res.status(400).json({ error: err.message });
     }
   }
 
