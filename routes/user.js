@@ -15,4 +15,3 @@ module.exports = {
   logout: router.get('/users/logout', userCtrl.logout),
   setAdmin: router.patch('/users', userCtrl.setAdmin),
 };
-
