@@ -1,5 +1,120 @@
+const rdmString = require('randomstring');
+const token = require('token');
 const db = require('../db/index');
 const validator = require('../validator/MerchantValidator');
+const merchantValidator = require('../validator/MerchantValidator');
+const TransactionMDb = require('../mongoDb/models/Transaction');
+const { authorize } = require('../utils/authorization');
+
+exports.getMerchants = async (req, res) => {
+  const merchants = await db.Merchant.findAll();
+
+  const results = merchants.map((merchant) => {
+    const {
+      approved,
+      contactEmail,
+      contactLastName,
+      contactFirstName,
+      companyName,
+      contactPhone,
+      currency,
+      kbis,
+      confirmationRedirectUrl,
+      cancellationRedirectUrl,
+    } = merchant.dataValues;
+    return {
+      approved,
+      contactEmail,
+      contactLastName,
+      contactFirstName,
+      companyName,
+      contactPhone,
+      currency,
+      kbis,
+      confirmationRedirectUrl,
+      cancellationRedirectUrl,
+    };
+  });
+  return res.status(200)
+    .json({
+      merchants: results,
+    });
+};
+
+exports.getMerchantTransactionById = async (req, res) => {
+  const { id, transactionId } = req.params;
+
+  if (!id || !transactionId) {
+    return res.sendStatus(404);
+  }
+
+  const transactions = await TransactionMDb.aggregate([{ $match: { $and: [{ transactionId }, { merchantId: id }] } }]).exec();
+  return res.status(200)
+    .json(transactions);
+};
+
+// eslint-disable-next-line consistent-return
+exports.validateOrInvalidateMerchant = async (req, res, next) => {
+  const { approved } = req.body;
+  const { id: merchantId } = req.params;
+
+  try {
+    authorize(req, res, merchantId);
+
+    if (!merchantId) {
+      throw new Error('422 Unprocessable Entity');
+    }
+
+    const merchantToApprove = await db.Merchant.findOne({ where: { id: merchantId } });
+    if (!merchantToApprove) {
+      throw new Error('404 Not Found');
+    }
+
+    if (merchantToApprove.approved === approved) {
+      throw new Error('422 Unprocessable Entity');
+    }
+
+    if (!approved) {
+      if (!merchantToApprove.credentialsId) {
+        throw new Error('422 Unprocessable Entity');
+      }
+      const oldCredentialsId = merchantToApprove.credentialsId;
+      const merchantUpdated = await merchantToApprove.update({
+        approved: false,
+        credentialsId: null,
+      });
+
+      await db.Credential.destroy({ where: { id: oldCredentialsId } });
+
+      return res.status(200).json(merchantUpdated);
+    }
+
+    const secret = rdmString.generate();
+    token.defaults.secret = secret;
+
+    const credentials = await db.Credential.create({
+      clientSecret: secret,
+      clientToken: token.generate(secret),
+      clientId: merchantId,
+    });
+
+    if (!credentials) {
+      throw new Error('404 Not Found');
+    }
+
+    merchantToApprove.update({
+      approved: true,
+      credentialsId: credentials.id,
+    });
+
+    if (!merchantToApprove) {
+      throw new Error('404 Not Found');
+    }
+    return res.status(200).json(merchantToApprove);
+  } catch (error) {
+    next(error);
+  }
+};
 
 exports.signup = async (req, res) => {
   if (!validator.validateEmail(req.body.contactEmail)
@@ -114,20 +229,75 @@ exports.getMerchantTransactions = async (req, res, next) => {
   }
 };
 
+exports.updateMerchantAccount = async (req, res) => {
+  const { id: merchantId } = req.params;
+  const { approved, ...merchantData } = req.body;
+
+  if (!merchantId) {
+    return res.sendStatus(422);
+  }
+
+  if (merchantData.email && !merchantValidator.validateEmail(merchantData.email)) {
+    return res.sendStatus(422);
+  }
+
+  if (merchantData.password && !merchantValidator.validatePassword(merchantData.password)) {
+    return res.sendStatus(422);
+  }
+
+  if (merchantData.companyName && !merchantValidator.validateSociety(merchantData.companyName)) {
+    return res.sendStatus(422);
+  }
+
+  if (merchantData.contactPhone && !merchantValidator.validatePhoneNumber(merchantData.contactPhone)) {
+    return res.sendStatus(422);
+  }
+
+  if (merchantData.currency && !merchantValidator.validateCurrency(merchantData.currency)) {
+    return res.sendStatus(422);
+  }
+
+  if (merchantData.confirmationRedirectUrl && !merchantValidator.validateConfirmationUrl(merchantData.confirmationRedirectUrl)) {
+    return res.sendStatus(422);
+  }
+
+  if (merchantData.cancellationRedirectUrl && !merchantValidator.validateRejectUrl(merchantData.cancellationRedirectUrl)) {
+    return res.sendStatus(422);
+  }
+
+  if (merchantData.kbis && !merchantValidator.validateKbis(merchantData.kbis)) {
+    return res.sendStatus(422);
+  }
+
+  if (merchantData.domain && !merchantValidator.validateDomain(merchantData.domain)) {
+    return res.sendStatus(422);
+  }
+
+  const merchantToUpdate = await db.Merchant.findOne({ where: { id: merchantId } });
+  if (!merchantToUpdate) {
+    return res.sendStatus(404);
+  }
+
+  const updatedMerchant = await merchantToUpdate.update(req.body, { where: { id: merchantId } });
+
+  if (!updatedMerchant) {
+    return res.sendStatus(404);
+  }
+
+  return res.status(200).json(updatedMerchant);
+};
+
 // eslint-disable-next-line consistent-return
 exports.getMerchantAccount = async (req, res, next) => {
   const merchantId = req.params.id;
   try {
-    console.log(parseInt(req.merchantId, 10) !== parseInt(merchantId, 10));
-    console.log(req.role);
-
     if (req.role !== 'user') {
       if (parseInt(req.merchantId, 10) !== parseInt(merchantId, 10)) {
         throw new Error('401 Unauthorized');
       }
     }
 
-    if ((!req.merchantId && req.role !== 'user')) {
+    if (!req.isAdmin) {
       throw new Error('401 Unauthorized');
     }
 
@@ -136,31 +306,10 @@ exports.getMerchantAccount = async (req, res, next) => {
       throw new Error('404 Not Found');
     }
 
-    console.log(res.headersSent);
-    return res.status(200)
-      .json({
-        contactEmail: merchant.contactEmail,
-        contactLastName: merchant.contactLastName,
-        contactFirstName: merchant.contactFirstName,
-        companyName: merchant.companyName,
-        contactPhone: merchant.contactPhone,
-        currency: merchant.currency,
-        confirmationRedirectUrl: merchant.confirmationRedirectUrl,
-        cancellationRedirectUrl: merchant.cancellationRedirectUrl,
-        kbis: merchant.kbis,
-      });
+    const { password, ...rest } = merchant;
+
+    return res.status(200).json(rest);
   } catch (e) {
     next(e);
   }
-};
-
-exports.updateMerchant = async (req, res) => {
-  /* if (admin) {
-     merchantToUpdate.update(req.body, { where: { id } });
-   }
-
-   req.body.approved = merchantToUpdate.approved;
-   merchantToUpdate.update(req.body, { where: { id } });
-
-   return res.status(200); */
 };

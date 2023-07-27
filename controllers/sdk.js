@@ -20,23 +20,3 @@ exports.sendForm = async (req, res) => {
     return res.status(500).send('Une erreur est survenue lors de la récupération des données de transaction');
   }
 };
-
-exports.processPayment = async (req, res) => {
-  const formData = req.body;
-  console.log('Données de paiement:', formData);
-  // Demande de vérification de la transaction au PSP
-  await fetch('http://psp:1338/api/psp/transactions/verifications', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      id: formData.transactionId,
-      amount: formData.amount,
-      currency: formData.currency,
-      userId: formData.userId,
-      merchantId: formData.merchantId,
-    }),
-  });
-  res.send('Paiement effectué avec succès !');
-};

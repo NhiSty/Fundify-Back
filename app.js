@@ -42,31 +42,30 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/api/auth', userRoutes.create);
-app.use('/api/', sdkRoutes);
-app.use('/api', webhooks);
 app.use('/api/auth', userRoutes.login);
 app.use('/api/auth', userRoutes.logout);
+app.use('/api/', sdkRoutes);
+app.use('/api', webhooks);
 
 app.use(authMiddleware);
-app.use('/api', operationRoutes.getOperation);
-app.use('/api', operationRoutes.updateOperation);
-app.use('/api', operationRoutes.deleteOperation);
 app.use('/api', operationRoutes.getTransactionOperations);
-
-app.use('/api', transactionRoutes.getMerchantTransactions);
-app.use('/api', transactionRoutes.deleteTransaction);
+app.use('/api', merchantRoutes.getMerchantTransactionById);
+app.use('/api', merchantRoutes.getMerchant);
+app.use('/api', merchantRoutes.getAllMerchants);
+app.use('/api', merchantRoutes.validateOrInvalidateMerchant);
+app.use('/api', merchantRoutes.updateMerchantAccount);
 app.use('/api', transactionRoutes.updateTransaction);
-
-app.use('/api', merchantRoutes.getMerchantAccount);
-
+app.use('/api', transactionRoutes.getTransaction);
+app.use('/api', transactionRoutes.getAllTransactions);
 app.use('/api', userRoutes.setAdmin);
-app.use('/api', userRoutes.validateOrInvalidateMerchant);
+app.use('/api', userRoutes.updateUser);
 
 app.use(bearerMiddleware);
+app.use((req, res, next) => console.log(req.test));
 app.use('/api', transactionRoutes.createTransaction);
 app.use('/api', merchantRoutes.getMerchantTransactions);
 app.use('/api', operationRoutes.createOperation);
+app.use('/api/auth', userRoutes.create);
 
 app.use(errorHandler);
 

@@ -1,5 +1,5 @@
-const jsonwebtoken = require('jsonwebtoken');
 const db = require('../db/index');
+const TransactionMDb = require('../mongoDb/models/Transaction');
 
 const statusEnum = [
   'PENDING',
@@ -8,38 +8,47 @@ const statusEnum = [
 ];
 const TransactionValidator = require('../validator/TransactionValidator');
 const idItsMe = require('../utils/idItsMe');
+const { authorize } = require('../utils/authorization');
 
-exports.createTransaction = async (req, res) => {
-  const { merchantId, userId } = req.body;
+// eslint-disable-next-line consistent-return
+exports.createTransaction = async (req, res, next) => {
+  const { merchantId } = req.body;
 
-  if (idItsMe(req, userId)) {
-    return res.status(403).json();
+  try {
+    authorize(req, res, merchantId);
+
+    if (!merchantId) {
+      throw new Error('422 Unprocessable Entity');
+    }
+
+    if (req.body.status && statusEnum.includes(req.body.status) === false) {
+      throw new Error('422 Unprocessable Entity');
+    }
+
+    if (!TransactionValidator.validateAmount(req.body.amount)) {
+      throw new Error('422 Unprocessable Entity');
+    }
+
+    if (!TransactionValidator.validateCurrency(req.body.currency)) {
+      throw new Error('422 Unprocessable Entity');
+    }
+    const merchant = await db.Merchant.findByPk(merchantId);
+
+    if (!merchant) {
+      throw new Error('404 Not Found');
+    }
+
+    const transaction = await db.Transaction.create(req.body);
+
+    return res.status(201).json(transaction);
+  } catch (error) {
+    next(error);
   }
+};
 
-  if (!merchantId) {
-    return res.status(422).json();
-  }
-
-  if (req.body.status && statusEnum.includes(req.body.status) === false) {
-    return res.status(422).json();
-  }
-
-  if (!TransactionValidator.validateAmount(req.body.amount)) {
-    return res.status(422).json();
-  }
-
-  if (!TransactionValidator.validateCurrency(req.body.currency)) {
-    return res.status(422).json();
-  }
-  const merchant = await db.Merchant.findByPk(merchantId);
-
-  if (!merchant) {
-    return res.status(404).json();
-  }
-
-  const transaction = await db.Transaction.create(req.body);
-
-  return res.status(201).json(transaction);
+exports.getAllTransactions = async (req, res) => {
+  const transactions = await TransactionMDb.findAll();
+  return res.status(200).json(transactions);
 };
 
 exports.getTransaction = async (req, res) => {
@@ -49,7 +58,7 @@ exports.getTransaction = async (req, res) => {
     return res.status(422).json();
   }
 
-  const transaction = await db.Transaction.findOne({ where: { id: transactionId } });
+  const transaction = TransactionMDb.findOne({ where: { id: transactionId } });
 
   const { merchantId, userId } = transaction;
   if (idItsMe(req, merchantId)) {
@@ -107,16 +116,6 @@ exports.updateTransaction = async (req, res) => {
   if (!transactionToUpdate) {
     return res.status(404).json();
   }
-
-  /*
-  // si un lambda essai de modifier une transaction qui ne lui appartient pas
-  const { merchantId } = transactionToUpdate;
-
-  if (idItsMe(req, merchantId)) {
-    return res.status(403).json();
-  }
-
-   */
 
   const updatedTransaction = await transactionToUpdate.update(req.body, { where: { id: transactionId } });
 

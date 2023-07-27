@@ -4,7 +4,6 @@ const router = express.Router();
 
 const sdkCtroller = require('../controllers/sdk');
 
-router.get('/sdk/transaction/:id', sdkCtroller.sendForm);
-router.post('/sdk/process-payment', sdkCtroller.processPayment);
+router.get('/sdk/transactions/:id', sdkCtroller.sendForm);
 
 module.exports = router;

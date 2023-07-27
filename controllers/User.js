@@ -9,94 +9,6 @@ const db = require('../db/index');
 const validator = require('../validator/UserValidator');
 const merchantValidator = require('../validator/MerchantValidator');
 
-exports.validateOrInvalidateMerchant = async (req, res) => {
-  const { isApproved } = req.body;
-  const { id: merchantId } = req.params;
-
-  if (!merchantId) {
-    return res.sendStatus(422);
-  }
-
-  const merchantToApprove = await db.Merchant.findOne({ where: { id: merchantId } });
-  if (!merchantToApprove) {
-    return res.sendStatus(404);
-  }
-
-  if (!isApproved) {
-    const merchantUpdated = await merchantToApprove.update({
-      approved: false,
-    });
-    return res.status(200).json(merchantUpdated);
-  }
-
-  const secret = rdmString.generate();
-  token.defaults.secret = secret;
-
-  const credentials = await db.Credential.create({
-    clientSecret: secret,
-    clientToken: token.generate(secret),
-    clientId: merchantId,
-  });
-
-  if (!credentials) {
-    return res.sendStatus(404);
-  }
-
-  merchantToApprove.update({
-    approved: true,
-    credentialsId: credentials.id,
-  });
-
-  if (!merchantToApprove) {
-    return res.sendStatus(404);
-  }
-  return res.status(200).json(merchantToApprove);
-};
-
-exports.getOneMerchant = async (req, res) => {
-  const { id } = req.params;
-  const merchant = await db.Merchant.findOne({ where: { id } });
-  if (!merchant) {
-    return res.sendStatus(404);
-  }
-  return res.status(200).json(merchant);
-};
-
-exports.getMerchants = async (req, res) => {
-  const merchants = await db.Merchant.findAll();
-
-  const results = merchants.map((merchant) => {
-    const {
-      approved,
-      contactEmail,
-      contactLastName,
-      contactFirstName,
-      companyName,
-      contactPhone,
-      currency,
-      kbis,
-      confirmationRedirectUrl,
-      cancellationRedirectUrl,
-    } = merchant.dataValues;
-    return {
-      approved,
-      contactEmail,
-      contactLastName,
-      contactFirstName,
-      companyName,
-      contactPhone,
-      currency,
-      kbis,
-      confirmationRedirectUrl,
-      cancellationRedirectUrl,
-    };
-  });
-  return res.status(200)
-    .json({
-      merchants: results,
-    });
-};
-
 exports.getTransactions = async (req, res) => {
   const transactions = await db.Transaction.findAll();
   return res.status(200)
@@ -109,64 +21,33 @@ exports.getOperations = async (req, res) => {
     .json(operations);
 };
 
-exports.updateMerchantAccount = async (req, res) => {
-  const { id: merchantId } = req.params;
-  const { approved, ...merchantData } = req.body;
+exports.updateUser = async (req, res) => {
+  const { id } = req.params;
+  const { email, lastname, firstname } = req.body;
 
-  if (!merchantId) {
+  if (!validator.validateEmail(email)
+    || !validator.validateLastname(lastname)
+    || !validator.validateFirstname(firstname)) {
     return res.sendStatus(422);
   }
 
-  if (merchantData.email && !merchantValidator.validateEmail(merchantData.email)) {
-
-    return res.sendStatus(422);
-  }
-
-  if (merchantData.password && !merchantValidator.validatePassword(merchantData.password)) {
-    return res.sendStatus(422);
-  }
-
-  if (merchantData.companyName && !merchantValidator.validateSociety(merchantData.companyName)) {
-    return res.sendStatus(422);
-  }
-
-  if (merchantData.contactPhone && !merchantValidator.validatePhoneNumber(merchantData.contactPhone)) {
-    return res.sendStatus(422);
-  }
-
-  if (merchantData.currency && !merchantValidator.validateCurrency(merchantData.currency)) {
-    return res.sendStatus(422);
-  }
-
-  if (merchantData.confirmationRedirectUrl && !merchantValidator.validateConfirmationUrl(merchantData.confirmationRedirectUrl)) {
-    return res.sendStatus(422);
-  }
-
-  if (merchantData.cancellationRedirectUrl && !merchantValidator.validateRejectUrl(merchantData.cancellationRedirectUrl)) {
-    return res.sendStatus(422);
-  }
-
-  if (merchantData.kbis && !merchantValidator.validateKbis(merchantData.kbis)) {
-    return res.sendStatus(422);
-  }
-
-  if (merchantData.domain && !merchantValidator.validateDomain(merchantData.domain)) {
-    return res.sendStatus(422);
-  }
-
-  const merchantToUpdate = await db.Merchant.findOne({ where: { id: merchantId } });
-  if (!merchantToUpdate) {
+  const user = await db.User.findOne({ where: { id } });
+  if (!user) {
     return res.sendStatus(404);
   }
 
-  const updatedMerchant = await merchantToUpdate.update(req.body, { where: { id: merchantId } });
+  const userUpdated = await user.update({
+    email,
+    lastname,
+    firstname,
+  });
 
-  if (!updatedMerchant) {
+  if (!userUpdated) {
     return res.sendStatus(404);
   }
 
-  return res.status(200).json(updatedMerchant);
-};
+  return res.status(200).json(userUpdated);
+}
 
 exports.create = async (req, res) => {
   if (!validator.validateEmail(req.body.email)
@@ -226,7 +107,7 @@ exports.create = async (req, res) => {
       firstname: req.body.firstname,
     });
     if (userCreated) {
-      return res.status(212).json(userCreated);
+      return res.status(201).json(userCreated);
     }
   } catch (e) {
     console.log(e);

@@ -15,6 +15,11 @@ module.exports = function (connection) {
     generateToken() {
       // eslint-disable-next-line global-require
       const jwt = require('jsonwebtoken');
+      console.log({
+        id: this.id,
+        merchantId: this.merchantId,
+        isAdmin: this.isAdmin,
+      })
       return jwt.sign({
         id: this.id,
         merchantId: this.merchantId,

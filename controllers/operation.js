@@ -1,6 +1,7 @@
 const db = require('../db/index');
 const OperationValidator = require('../validator/OperationValidator');
 const TransactionMDb = require('../mongoDb/models/Transaction');
+const {authorize} = require("../utils/authorization");
 
 exports.createOperation = async (req, res) => {
   const { transactionId } = req.body;
@@ -63,6 +64,7 @@ exports.createOperation = async (req, res) => {
 
 exports.getOperation = async (req, res) => {
   const operationId = req.params.id;
+
 
   if (!operationId) {
     return res.status(422).json();
