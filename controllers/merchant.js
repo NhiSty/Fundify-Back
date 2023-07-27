@@ -231,7 +231,7 @@ exports.getMerchantAccount = async (req, res, next) => {
   try {
     authorize(req, res, merchantId);
 
-    if (req.role !== 'user') {
+    if (req.role !== 'admin') {
       if (parseInt(req.merchantId, 10) !== parseInt(merchantId, 10)) {
         throw new Error('401 Unauthorized');
       }
