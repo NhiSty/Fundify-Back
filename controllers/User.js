@@ -137,12 +137,17 @@ exports.login = async (req, res) => {
         .json();
     }
 
-    const merchant = await db.Merchant.findOne({ where: { id: user.merchantId } });
-    if (!merchant) {
-      return res.status(401).json();
-    }
+    let sign;
 
-    const sign = user.generateToken(merchant.approved);
+    if (user.merchantId !== null) {
+      const merchant = await db.Merchant.findOne({ where: { id: user.merchantId } });
+      if (!merchant) {
+        return res.status(401).json();
+      }
+      sign = user.generateToken(merchant.approved);
+    } else {
+      sign = await user.generateToken();
+    }
 
     return res.cookie(
       'token',

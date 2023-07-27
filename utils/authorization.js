@@ -3,6 +3,10 @@ exports.authorize = (req, res, merchantId) => {
     merchantId: reqMerchantId, isAdmin,
   } = req;
 
+  console.log('reqMerchantId:', reqMerchantId);
+  console.log('merchantId:', merchantId);
+  console.log('isAdmin:', isAdmin);
+
   if (!isAdmin) {
     if (reqMerchantId !== merchantId) {
       throw new Error('403 Forbidden');
