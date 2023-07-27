@@ -55,7 +55,7 @@ module.exports = function (connection) {
         },
       },
       merchantId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         references: {
           model: 'Merchants',
           key: 'id',
