@@ -5,16 +5,9 @@ const {
 const db = require('../db/index');
 const validator = require('../validator/UserValidator');
 
-exports.getTransactions = async (req, res) => {
-  const transactions = await db.Transaction.findAll();
-  return res.status(200)
-    .json(transactions);
-};
-
-exports.getOperations = async (req, res) => {
-  const operations = await db.Operation.findAll();
-  return res.status(200)
-    .json(operations);
+exports.getUsers = async (req, res) => {
+  const users = await db.User.findAll({ where: { merchantId: null } });
+  return res.status(200).json(users);
 };
 
 exports.updateUser = async (req, res) => {
