@@ -7,7 +7,6 @@ const app = express();
 const bodyParser = require('body-parser');
 const path = require('path');
 const errorHandler = require('./middleware/errorHandler');
-const merchantAuthMiddleware = require('./middleware/merchantAuthMiddleware');
 const authMiddleware = require('./middleware/authMiddleware');
 const bearerMiddleware = require('./middleware/bearerMiddleware');
 const merchantRoutes = require('./routes/merchant');
@@ -50,37 +49,26 @@ app.use('/api/auth', userRoutes.login);
 app.use('/api/auth', userRoutes.logout);
 
 app.use(authMiddleware);
-app.use('/api', operationRoutes.createOperation);
 app.use('/api', operationRoutes.getOperation);
 app.use('/api', operationRoutes.updateOperation);
 app.use('/api', operationRoutes.deleteOperation);
 app.use('/api', operationRoutes.getTransactionOperations);
 
-// app.use(merchantAuthMiddleware);
-// app.use(bearerMiddleware);
 app.use('/api', transactionRoutes.getMerchantTransactions);
-app.use('/api', transactionRoutes.getTransaction);
 app.use('/api', transactionRoutes.deleteTransaction);
 app.use('/api', transactionRoutes.updateTransaction);
 
 app.use('/api', merchantRoutes.getMerchantAccount);
-app.use('/api', merchantRoutes.getMerchantTransactions);
 
 app.use('/api', userRoutes.setAdmin);
 app.use('/api', userRoutes.validateOrInvalidateMerchant);
 
+app.use(bearerMiddleware);
+app.use('/api', transactionRoutes.createTransaction);
+app.use('/api', merchantRoutes.getMerchantTransactions);
+app.use('/api', operationRoutes.createOperation);
+
 app.use(errorHandler);
-
-/*
-try {
-  db.connection.authenticate().then(() => {
-    console.log('Connection has been established successfully.');
-  });
-} catch (error) {
-  console.error('Unable to connect to the database:', error);
-}
-
- */
 
 app.use('/', express.static(path.join(__dirname, './public')));
 module.exports = app;
