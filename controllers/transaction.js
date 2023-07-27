@@ -48,7 +48,7 @@ exports.createTransaction = async (req, res, next) => {
 // eslint-disable-next-line consistent-return
 exports.getAllTransactions = async (req, res, next) => {
   try {
-    checkRole(req, res, next, 'admin');
+    checkRole(req, res, 'admin');
 
     const transactions = await TransactionMDb.findAll();
     return res.status(200).json(transactions);

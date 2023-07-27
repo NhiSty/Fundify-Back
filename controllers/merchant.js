@@ -9,6 +9,7 @@ const { authorize, checkRole } = require('../utils/authorization');
 exports.getMerchants = async (req, res, next) => {
   try {
     checkRole(req, res, 'admin');
+
     const merchants = await db.Merchant.findAll();
 
     const results = merchants.map((merchant) => {
@@ -73,7 +74,7 @@ exports.validateOrInvalidateMerchant = async (req, res, next) => {
   const { id: merchantId } = req.params;
 
   try {
-    checkRole(req, res, next, 'admin');
+    checkRole(req, res, 'admin');
 
     if (!merchantId) {
       throw new Error('422 Unprocessable Entity');

@@ -9,7 +9,7 @@ const { checkRole } = require('../utils/authorization');
 // eslint-disable-next-line consistent-return
 exports.getUsers = async (req, res, next) => {
   try {
-    checkRole(req, res, next, 'admin');
+    checkRole(req, res, 'admin');
 
     const users = await db.User.findAll({ where: { merchantId: null } });
     return res.status(200).json(users);
@@ -163,7 +163,7 @@ exports.setAdmin = async (req, res, next) => {
   const { userId } = req.body;
 
   try {
-    checkRole(req, res, next, 'admin');
+    checkRole(req, res, 'admin');
 
     if (!userId) {
       return res.sendStatus(422);
