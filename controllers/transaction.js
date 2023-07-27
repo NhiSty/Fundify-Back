@@ -1,29 +1,58 @@
 const db = require('../db/index');
 const TransactionValidator = require('../validator/TransactionValidator');
+const currencyData = require('../currency_data.json');
+
+const getCurrencyConversionRate = (fromCurrency, toCurrency) => {
+  const conversionRate = currencyData[`${fromCurrency}/${toCurrency}`];
+  if (!conversionRate) {
+    throw new Error(`Unsupported currency conversion: ${fromCurrency} to ${toCurrency}`);
+  }
+  return conversionRate;
+};
 
 exports.createTransaction = async (req, res) => {
-  const { merchantId } = req.body;
-  if (!merchantId) {
+  const { merchantId, amount, currency } = req.body;
+
+  if (!merchantId || !amount || !currency) {
     return res.status(422).json();
   }
 
   if (req.body.status && !TransactionValidator.validateStatus(req.body.status)) {
     return res.status(422).json();
   }
-  if (!TransactionValidator.validateAmount(req.body.amount)) {
+
+  if (!TransactionValidator.validateAmount(amount)) {
     return res.status(422).json();
   }
 
-  if (!TransactionValidator.validateCurrency(req.body.currency)) {
+  if (!TransactionValidator.validateCurrency(currency)) {
     return res.status(422).json();
   }
+
   const merchant = await db.Merchant.findByPk(merchantId);
 
   if (!merchant) {
     return res.status(404).json();
   }
 
-  const transaction = await db.Transaction.create(req.body);
+  const merchantCurrency = merchant.currency;
+  let convertedAmount = amount;
+
+  if (currency !== merchantCurrency) {
+    try {
+      const conversionRate = getCurrencyConversionRate(merchantCurrency, currency);
+      convertedAmount = amount * conversionRate;
+    } catch (err) {
+      return res.status(400).json({ error: err.message });
+    }
+  }
+
+  const transaction = await db.Transaction.create({
+    ...req.body,
+    amount: convertedAmount,
+    currency: currency,
+  });
+
   return res.status(201).json(transaction);
 };
 
