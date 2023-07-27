@@ -6,7 +6,10 @@ const urlToScrap = 'https://fr.tradingview.com/markets/currencies/cross-rates-ov
 
 async function getHtmlPage() {
   try {
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
     const websitePage = await browser.newPage();
     await websitePage.goto(urlToScrap, {
       waitUntil: 'domcontentloaded',
