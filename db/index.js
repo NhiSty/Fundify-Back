@@ -5,13 +5,13 @@ require('dotenv').config();
 
 const connection = new Sequelize(process.env.DATABASE_URL, {
   dialect: 'postgres',
-  dialectOptions: {
+  /*dialectOptions: {
     ssl: {
       require: true,
       rejectUnauthorized: false,
     },
 
-  },
+  },*/
 });
 
 const db = {
