@@ -9,6 +9,7 @@ const path = require('path');
 const errorHandler = require('./middleware/errorHandler');
 const merchantRoutes = require('./routes/merchant');
 const transactionRoutes = require('./routes/transaction');
+const kpisRoute = require('./routes/kpis');
 const operationRoutes = require('./routes/operation');
 const sdkRoutes = require('./routes/sdk');
 const webhooks = require('./routes/webhook');
@@ -55,6 +56,7 @@ app.use('/api', merchantRoutes.updateMerchantAccount);
 app.use('/api', transactionRoutes.getTransaction);
 app.use('/api', userRoutes.updateUser);
 app.use('/api/auth', userRoutes.logout);
+app.use('/api', kpisRoute.getTransactionsStatusKPIS);
 
 // Routes protégées par le middleware d'authentification (seulement) et admin
 app.use('/api', merchantRoutes.getAllMerchants);
@@ -67,6 +69,8 @@ app.use('/api', userRoutes.getUsers);
 app.use('/api', transactionRoutes.createTransaction);
 app.use('/api', merchantRoutes.getMerchantTransactions);
 app.use('/api', operationRoutes.createOperation);
+
+
 
 app.use(errorHandler);
 

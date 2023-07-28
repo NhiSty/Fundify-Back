@@ -181,8 +181,10 @@ exports.getMerchantTransactions = async (req, res, next) => {
       throw new Error('422 Unprocessable Entity');
     }
 
-    if (!req.merchantId || req.merchantId !== merchantId) {
-      throw new Error('401 Unauthorized');
+    if (!req.isAdmin) {
+      if (!req.merchantId || req.merchantId !== merchantId) {
+        throw new Error('401 Unauthorized');
+      }
     }
 
     const merchant = await db.Merchant.findOne({ where: { id: merchantId } });
