@@ -149,17 +149,10 @@ exports.login = async (req, res) => {
       sign = await user.generateToken();
     }
 
-    return res.cookie(
-      'token',
-      sign,
-      {
-        httpOnly: false,
-        secure: false,
-        SameSite: 'None',
-      },
-    )
-      .status(200)
-      .json();
+    return res.json({
+      token: sign,
+    })
+      .status(200);
   } catch (e) {
     // eslint-disable-next-line no-console
     console.log(e);

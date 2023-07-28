@@ -7,6 +7,8 @@ exports.getTransactionsStatusKPIS = async (req, res, next) => {
   try {
     checkRole(req, res, 'admin');
 
+    console.log('getTransactionsStatusKPIS')
+
     const countTransactionsByStatus = await TransactionMDb.aggregate([
       {
         $group: {

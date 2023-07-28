@@ -4,7 +4,7 @@ const TransactionMDb = require('../mongoDb/models/Transaction');
 const TransactionValidator = require('../validator/TransactionValidator');
 const {
   authorize,
-  checkRole
+  checkRole,
 } = require('../utils/authorization');
 require('dotenv')
   .config();
@@ -13,7 +13,7 @@ require('dotenv')
 exports.createTransaction = async (req, res, next) => {
   const {
     merchantId,
-    userId
+    userId,
   } = req.body;
   const amout = parseFloat(req.body.amount);
 

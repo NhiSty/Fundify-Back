@@ -20,6 +20,7 @@ exports.checkRole = (req, res, role) => {
   const { role: reqRole } = req;
 
   if (reqRole !== role) {
+    console.log('403 Forbidden');
     throw new Error('403 Forbidden');
   }
 };
