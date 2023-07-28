@@ -2,12 +2,19 @@ const db = require('../db/index');
 const TransactionMDb = require('../mongoDb/models/Transaction');
 
 const TransactionValidator = require('../validator/TransactionValidator');
-const { authorize, checkRole } = require('../utils/authorization');
-require('dotenv').config();
+const {
+  authorize,
+  checkRole
+} = require('../utils/authorization');
+require('dotenv')
+  .config();
 
 // eslint-disable-next-line consistent-return
 exports.createTransaction = async (req, res, next) => {
-  const { merchantId, userId } = req.body;
+  const {
+    merchantId,
+    userId
+  } = req.body;
   const amout = parseFloat(req.body.amount);
 
   if (!merchantId) {
@@ -47,10 +54,11 @@ exports.createTransaction = async (req, res, next) => {
 
     console.log(process.env.URL_PAYMENT_FORM);
 
-    return res.status(201).json({
-      url: `${process.env.URL_PAYMENT_FORM}/${transaction.id}`,
-      clientSecret: credentials.clientSecret,
-    });
+    return res.status(201)
+      .json({
+        url: `${process.env.URL_PAYMENT_FORM}/${transaction.id}`,
+        clientSecret: credentials.clientSecret,
+      });
   } catch (error) {
     next(error);
   }
@@ -62,7 +70,8 @@ exports.getAllTransactions = async (req, res, next) => {
     checkRole(req, res, 'admin');
 
     const transactions = await TransactionMDb.find({});
-    return res.status(200).json(transactions);
+    return res.status(200)
+      .json(transactions);
   } catch (error) {
     next(error);
   }
@@ -72,16 +81,20 @@ exports.getAllTransactions = async (req, res, next) => {
 exports.getTransaction = async (req, res, next) => {
   const transactionId = req.params.id;
   if (!transactionId) {
-    return res.status(422).json();
+    return res.status(422)
+      .json();
   }
+
   try {
-    const transaction = TransactionMDb.findOne({ where: { id: transactionId } });
+    const transaction = await TransactionMDb.find({ transactionId });
     if (!transaction) {
-      return res.status(404).json();
+      return res.status(404)
+        .json();
     }
     const { merchantId } = transaction;
     authorize(req, res, merchantId);
-    return res.status(200).json(transaction);
+    return res.status(200)
+      .json(transaction);
   } catch (error) {
     next(error);
   }
@@ -92,7 +105,8 @@ exports.getMerchantTransactions = async (req, res, next) => {
   const merchantId = req.params.id;
 
   if (!merchantId) {
-    return res.status(422).json();
+    return res.status(422)
+      .json();
   }
 
   try {
@@ -101,11 +115,13 @@ exports.getMerchantTransactions = async (req, res, next) => {
     const merchant = await db.Merchant.findByPk(merchantId);
 
     if (!merchant) {
-      return res.status(404).json();
+      return res.status(404)
+        .json();
     }
 
     const transactions = await TransactionMDb.find({ where: { merchantId } });
-    return res.status(200).json(transactions);
+    return res.status(200)
+      .json(transactions);
   } catch (error) {
     next(error);
   }
