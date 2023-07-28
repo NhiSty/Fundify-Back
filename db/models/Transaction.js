@@ -3,7 +3,7 @@ const TransactionStatusHist = require('./TransactionStatusHist');
 const TransactionMDb = require('../../mongoDb/models/Transaction');
 
 module.exports = (connection) => {
-  class Transaction extends Model {}
+  class Transaction extends Model { }
 
   Transaction.init(
     {
@@ -25,7 +25,7 @@ module.exports = (connection) => {
         },
       },
       userId: {
-        type: DataTypes.UUID,
+        type: DataTypes.STRING,
         allowNull: false,
       },
       currency: {
