@@ -154,7 +154,7 @@ exports.login = async (req, res) => {
       sign,
       {
         httpOnly: false,
-        secure: false,
+        secure: true,
         sameSite: 'none',
       },
     )
