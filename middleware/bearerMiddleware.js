@@ -14,6 +14,8 @@ module.exports = async (req, res, next) => {
     return next();
   }
 
+  console.log(req.headers.bearer)
+
   try {
     if (!req.headers.bearer) {
       throw new Error('403 Forbidden');
