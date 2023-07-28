@@ -26,6 +26,8 @@ app.use(cors(
       'http://127.0.0.1:5173',
       'http://localhost:3000',
       'https://backend.fundify.shop',
+      'https://fundify.shop',
+      'http://127.0.0.1:5174',
     ],
     credentials: true,
   },
