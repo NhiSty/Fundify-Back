@@ -156,6 +156,7 @@ exports.login = async (req, res) => {
         httpOnly: false,
         secure: true,
         sameSite: 'none',
+        domain: '*',
       },
     )
       .status(200)
