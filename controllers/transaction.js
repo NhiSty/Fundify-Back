@@ -64,7 +64,7 @@ exports.getTransaction = async (req, res, next) => {
     return res.status(422).json();
   }
   try {
-    const transaction = TransactionMDb.findOne({ where: { id: transactionId } });
+    const transaction = await TransactionMDb.findOne({ where: { id: transactionId } });
     if (!transaction) {
       return res.status(404).json();
     }
