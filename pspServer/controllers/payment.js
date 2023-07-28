@@ -24,7 +24,7 @@ exports.verifications = async (req, res) => {
 };
 
 function sendDoneNotification(body) {
-  const url = 'http://node:1337/api/operation/webhook';
+  const url = process.env.URL_NOTIFICATIONS;
 
   fetch(url, {
     method: 'POST',
