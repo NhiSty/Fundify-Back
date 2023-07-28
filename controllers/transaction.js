@@ -3,23 +3,25 @@ const TransactionMDb = require('../mongoDb/models/Transaction');
 
 const TransactionValidator = require('../validator/TransactionValidator');
 const { authorize, checkRole } = require('../utils/authorization');
+require('dotenv').config();
 
 // eslint-disable-next-line consistent-return
 exports.createTransaction = async (req, res, next) => {
   const { merchantId, userId } = req.body;
+  const amout = parseFloat(req.body.amount);
 
   if (!merchantId) {
     throw new Error('422 Unprocessable Entity');
   }
 
   try {
-    authorize(req, res, merchantId);
+    authorize(req, res, merchantId, false);
 
     if (!userId) {
       throw new Error('422 Unprocessable Entity');
     }
 
-    if (!TransactionValidator.validateAmount(req.body.amount)) {
+    if (!TransactionValidator.validateAmount(amout)) {
       throw new Error('422 Unprocessable Entity');
     }
 
@@ -33,13 +35,22 @@ exports.createTransaction = async (req, res, next) => {
     }
 
     const transaction = await db.Transaction.create({
-      amount: req.body.amount,
+      amount: amout,
       currency: req.body.currency,
       merchantId: merchant.id,
-      userId: req.userId,
+      userId,
     });
 
-    return res.status(201).json(transaction);
+    const merchantToSend = await db.Merchant.findByPk(merchantId);
+
+    const credentials = await db.Credential.findByPk(merchantToSend.credentialsId);
+
+    console.log(process.env.URL_PAYMENT_FORM);
+
+    return res.status(201).json({
+      url: `${process.env.URL_PAYMENT_FORM}/${transaction.id}`,
+      clientSecret: credentials.clientSecret,
+    });
   } catch (error) {
     next(error);
   }
@@ -64,7 +75,7 @@ exports.getTransaction = async (req, res, next) => {
     return res.status(422).json();
   }
   try {
-    const transaction = await TransactionMDb.findOne({ where: { id: transactionId } });
+    const transaction = TransactionMDb.findOne({ where: { id: transactionId } });
     if (!transaction) {
       return res.status(404).json();
     }

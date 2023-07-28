@@ -1,9 +1,15 @@
-exports.authorize = (req, res, merchantId) => {
+exports.authorize = (req, res, merchantId, domain = false) => {
   const {
     merchantId: reqMerchantId, isAdmin,
   } = req;
 
-  if (!isAdmin) {
+  console.log('domain:', domain);
+  console.log('reqMerchantId:', reqMerchantId);
+  console.log('merchantId:', merchantId);
+  console.log('isAdmin:', isAdmin);
+
+  if (!isAdmin && domain) {
+    console.log('403 encore Forbidden');
     if (reqMerchantId !== merchantId) {
       throw new Error('403 Forbidden');
     }
