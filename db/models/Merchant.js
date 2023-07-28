@@ -1,24 +1,17 @@
-const { Model, DataTypes } = require('sequelize');
+const {
+  Model,
+  DataTypes,
+} = require('sequelize');
 const MerchantMongo = require('../../mongoDb/models/Merchant');
 
 module.exports = function (connection) {
-  class Merchant extends Model {
-    async checkPassword(password) {
-      // eslint-disable-next-line global-require
-      const bcrypt = require('bcrypt');
-      return bcrypt.compare(password, this.password);
-    }
-
-    generateToken() {
-      // eslint-disable-next-line global-require
-      const jwt = require('jsonwebtoken');
-      return jwt.sign({ id: this.id, approved: this.approved }, process.env.JWT_SECRET, {
-        expiresIn: '1y',
-      });
-    }
-  }
-
+  class Merchant extends Model {}
   Merchant.init({
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
     companyName: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -28,22 +21,15 @@ module.exports = function (connection) {
       type: DataTypes.BLOB,
       allowNull: false,
     },
-    contactLastName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    contactFirstName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
     contactEmail: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
     },
-    password: {
+    domain: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique: true,
     },
     contactPhone: {
       type: DataTypes.STRING,
@@ -61,18 +47,18 @@ module.exports = function (connection) {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    clientToken: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    clientSecret: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
     approved: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,
+    },
+    credentialsId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'Credentials',
+        key: 'id',
+      },
+      allowNull: true,
     },
   }, {
     sequelize: connection,
@@ -85,8 +71,6 @@ module.exports = function (connection) {
     const newMerchant = new MerchantMongo({
       merchantId: merchant.id,
       companyName: merchant.companyName,
-      firstName: merchant.contactFirstName,
-      lastName: merchant.contactLastName,
       email: merchant.contactEmail,
       phone: merchant.contactPhone,
       approved: merchant.approved,
@@ -101,8 +85,6 @@ module.exports = function (connection) {
       { merchantId: merchant.id },
       {
         companyName: merchant.companyName,
-        firstName: merchant.contactFirstName,
-        lastName: merchant.contactLastName,
         email: merchant.contactEmail,
         phone: merchant.contactPhone,
         approved: merchant.approved,

@@ -1,4 +1,7 @@
-const { Model, DataTypes } = require('sequelize');
+const {
+  Model,
+  DataTypes,
+} = require('sequelize');
 
 // eslint-disable-next-line func-names
 module.exports = function (connection) {
@@ -9,10 +12,15 @@ module.exports = function (connection) {
       return bcrypt.compare(password, this.password);
     }
 
-    generateToken() {
+    generateToken(approved) {
       // eslint-disable-next-line global-require
       const jwt = require('jsonwebtoken');
-      return jwt.sign({ id: this.id, isAdmin: this.isAdmin }, process.env.JWT_SECRET, {
+      return jwt.sign({
+        id: this.id,
+        merchantId: this.merchantId,
+        isAdmin: this.isAdmin,
+        approved,
+      }, process.env.JWT_SECRET, {
         expiresIn: '1y',
       });
     }
@@ -20,6 +28,11 @@ module.exports = function (connection) {
 
   User.init(
     {
+      id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true,
+      },
       lastname: DataTypes.STRING,
       firstname: DataTypes.STRING,
       email: {
@@ -42,8 +55,16 @@ module.exports = function (connection) {
           min: 8,
         },
       },
+      merchantId: {
+        type: DataTypes.UUID,
+        references: {
+          model: 'Merchants',
+          key: 'id',
+        },
+      },
       isAdmin: {
         type: DataTypes.BOOLEAN,
+        allowNull: false,
         defaultValue: false,
       },
     },

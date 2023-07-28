@@ -1,17 +1,23 @@
 const { Model, DataTypes } = require('sequelize');
+const TransactionStatusHist = require('./TransactionStatusHist');
 const TransactionMDb = require('../../mongoDb/models/Transaction');
 
-module.exports = function (connection) {
+module.exports = (connection) => {
   class Transaction extends Model {}
 
   Transaction.init(
     {
+      id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true,
+      },
       amount: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
       },
       merchantId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         allowNull: false,
         references: {
           model: 'Merchants',
@@ -19,20 +25,20 @@ module.exports = function (connection) {
         },
       },
       userId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         allowNull: false,
-        references: {
-          model: 'Users',
-          key: 'id',
-        },
       },
       currency: {
         type: DataTypes.STRING,
         allowNull: false,
       },
       status: {
-        type: DataTypes.ENUM('PENDING', 'CONFIRMED', 'CANCELLED'),
-        defaultValue: 'PENDING',
+        type: DataTypes.ENUM('created', 'captured', 'waiting_refund', 'partial_refunded', 'refunded', 'cancelled'),
+        defaultValue: 'created',
+      },
+      deletedAt: {
+        type: DataTypes.DATE,
+        allowNull: true,
       },
     },
     {
@@ -44,6 +50,11 @@ module.exports = function (connection) {
 
   // Après création d'une transaction (Postgres) on crée une transaction (MongoDB)
   Transaction.afterCreate(async (transaction) => {
+    await TransactionStatusHist(connection).create({
+      transactionId: transaction.id,
+      status: transaction.status,
+    });
+
     const newTransactionMDb = new TransactionMDb({
       transactionId: transaction.id,
       merchantId: transaction.merchantId,
@@ -51,23 +62,16 @@ module.exports = function (connection) {
       amount: transaction.amount,
       currency: transaction.currency,
       status: transaction.status,
+      refundAmountAvailable: transaction.amount,
+      statusHist: [
+        {
+          status: transaction.status,
+          date: Date.now(),
+        },
+      ],
     });
 
     await newTransactionMDb.save();
-  });
-
-  // Après mise à jour d'une transaction (Postgres) on met à jour la transaction correspondante (MongoDB)
-  Transaction.afterUpdate(async (transaction) => {
-    await TransactionMDb.findOneAndUpdate(
-      { transactionId: transaction.id },
-      {
-        merchantId: transaction.merchantId,
-        userId: transaction.userId,
-        amount: transaction.amount,
-        currency: transaction.currency,
-        status: transaction.status,
-      },
-    );
   });
 
   // Après suppression d'une transaction (Postgres) on supprime la transaction correspondante (MongoDB)

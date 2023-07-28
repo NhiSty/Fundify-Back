@@ -1,19 +1,13 @@
 const express = require('express');
-const operationMiddleware = require('../middleware/operation');
+
+const bearerMiddleware = require('../middleware/bearerMiddleware');
+const authMiddleware = require('../middleware/authMiddleware');
 
 const router = express.Router();
-router.use(operationMiddleware);
 
 const operationCtrl = require('../controllers/operation');
 
-router.post('/operation/create', operationCtrl.createOperation);
-
-router.get('/operation/:id', operationCtrl.getOperation);
-
-router.get('/operations/transaction/:id', operationCtrl.getTransactionOperations);
-
-router.put('/operation/update', operationCtrl.updateOperation);
-
-router.delete('/operation/:id', operationCtrl.deleteOperation);
-
-module.exports = router;
+module.exports = {
+  createOperation: router.post('/operations', bearerMiddleware, operationCtrl.createOperation),
+  getTransactionOperations: router.get('/operations/transactions/:id', authMiddleware, operationCtrl.getTransactionOperations),
+};

@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 
 const merchantSchema = new mongoose.Schema({
   merchantId: {
-    type: Number,
+    type: String,
     required: true,
     unique: true,
   },
@@ -11,14 +11,6 @@ const merchantSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-  },
-  firstName: {
-    type: String,
-    required: true,
-  },
-  lastName: {
-    type: String,
-    required: true,
   },
   email: {
     type: String,
