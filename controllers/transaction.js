@@ -2,7 +2,7 @@ const db = require('../db/index');
 const TransactionMDb = require('../mongoDb/models/Transaction');
 
 const TransactionValidator = require('../validator/TransactionValidator');
-const { authorize, checkRole} = require('../utils/authorization');
+const { authorize, checkRole } = require('../utils/authorization');
 
 // eslint-disable-next-line consistent-return
 exports.createTransaction = async (req, res, next) => {

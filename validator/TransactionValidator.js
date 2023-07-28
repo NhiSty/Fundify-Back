@@ -12,18 +12,18 @@ module.exports = {
     return validStatusValues.includes(status);
   },
   validateCurrency: (currency) => {
-    let uniqueCurrencies = new Set();
+    const uniqueCurrencies = new Set();
 
-    for (let entry in data) {
+    for (const entry in data) {
       if (entry.includes('/')) {
-        let currencies = entry.split('/');
-        for (let currency of currencies) {
+        const currencies = entry.split('/');
+        for (const currency of currencies) {
           uniqueCurrencies.add(currency);
         }
       }
     }
     const currencies = Array.from(uniqueCurrencies);
-    console.log(currencies)
+    console.log(currencies);
     // If the currency is not in the list of supported currencies, return false
     if (!currencies.includes(currency)) {
       return false;

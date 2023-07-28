@@ -5,7 +5,6 @@ require('dotenv')
 
 // eslint-disable-next-line consistent-return
 module.exports = async (req, res, next) => {
-
   // @TODO remove this if statement when testing is complete
   if (req.hostname !== process.env.DOMAIN_NAME) {
     return next();

@@ -70,8 +70,6 @@ app.use('/api', transactionRoutes.createTransaction);
 app.use('/api', merchantRoutes.getMerchantTransactions);
 app.use('/api', operationRoutes.createOperation);
 
-
-
 app.use(errorHandler);
 
 app.use('/', express.static(path.join(__dirname, './public')));

@@ -4,7 +4,7 @@ const authMiddleware = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-const userCtrl = require('../controllers/User');
+const userCtrl = require('../controllers/user');
 
 module.exports = {
   create: router.post('/users', userCtrl.create),
