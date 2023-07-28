@@ -29,6 +29,7 @@ app.use(cors(
       'https://backend.fundify.shop',
       'https://fundify.shop',
       'http://127.0.0.1:5174',
+      'https://fundify-backoffice-ztt4.vercel.app',
     ],
     credentials: true,
   },
