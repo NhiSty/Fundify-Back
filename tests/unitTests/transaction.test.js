@@ -32,9 +32,12 @@ describe('Transaction amount validator', () => {
 
 describe('Transaction status validator', () => {
   it('valid status should return true', () => {
-    expect(TransactionValidator.validateStatus('PENDING')).toBe(true);
-    expect(TransactionValidator.validateStatus('CONFIRMED')).toBe(true);
-    expect(TransactionValidator.validateStatus('CANCELLED')).toBe(true);
+    expect(TransactionValidator.validateStatus('created')).toBe(true);
+    expect(TransactionValidator.validateStatus('captured')).toBe(true);
+    expect(TransactionValidator.validateStatus('waiting_refund')).toBe(true);
+    expect(TransactionValidator.validateStatus('partial_refunded')).toBe(true);
+    expect(TransactionValidator.validateStatus('refunded')).toBe(true);
+    expect(TransactionValidator.validateStatus('cancelled')).toBe(true);
   });
   it('empty status should return false', () => {
     expect(TransactionValidator.validateStatus('')).toBe(false);
