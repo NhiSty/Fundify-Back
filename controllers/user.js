@@ -169,8 +169,7 @@ exports.login = async (req, res) => {
       {
         httpOnly: false,
         secure: false,
-        sameSite: 'none',
-        domain: '*',
+        sameSite: 'None',
       },
     )
       .status(200)
