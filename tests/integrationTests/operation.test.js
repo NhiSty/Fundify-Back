@@ -220,3 +220,78 @@ describe('Operation - get operation by id', () => {
     expect(fetched.responseBody).toEqual({});
   });
 });
+describe('Operation - put update operation', () => {
+  it('should return a 200 status', async () => {
+    const operationId = 'uuidOperation1';
+    const statusCode = getStatusCode(true, action.operations, operationId, 'admin', 200, 401, 403, 422, 404, true);
+    const fetched = await fetch(
+      'http://localhost:1337/api/operations',
+      {
+        id: operationId,
+        amount: 2345.98,
+      },
+      statusCode,
+      {
+        id: operationId,
+        amount: 2345.98,
+        transactionId: 'uuidTransaction1',
+      },
+    );
+    expect(fetch).toHaveBeenCalled();
+    expect(fetched.status).toEqual(200);
+    expect(fetched.responseBody).toEqual({
+      id: operationId,
+      amount: 2345.98,
+      transactionId: 'uuidTransaction1',
+    });
+  });
+  it('should return a 401 status', async () => {
+    const operationId = 'uuidOperation1';
+    const statusCode = getStatusCode(true, action.operations, operationId, 'admin', 200, 401, 403, 422, 404, false);
+    const fetched = await fetch(
+      'http://localhost:1337/api/operations',
+      {
+        id: operationId,
+        amount: 2345.98,
+      },
+      statusCode,
+      {},
+    );
+    expect(fetch).toHaveBeenCalled();
+    expect(fetched.status).toEqual(401);
+    expect(fetched.responseBody).toEqual({});
+  });
+  it('should return a 422 status', async () => {
+    const operationId = 1;
+    const statusCode = getStatusCode(true, action.operations, operationId, 'admin', 200, 401, 403, 422, 404, true);
+    const fetched = await fetch(
+      'http://localhost:1337/api/operations',
+      {
+        id: operationId,
+        type: 'TOTAL',
+        amount: 2345.98,
+      },
+      statusCode,
+      {},
+    );
+    expect(fetch).toHaveBeenCalled();
+    expect(fetched.status).toEqual(422);
+    expect(fetched.responseBody).toEqual({});
+  });
+  it('should return a 404 status', async () => {
+    const operationId = 'uuid9';
+    const statusCode = getStatusCode(true, action.operations, operationId, 'admin', 200, 401, 403, 422, 404, true);
+    const fetched = await fetch(
+      'http://localhost:1337/api/operations',
+      {
+        id: operationId,
+        amount: 2345.98,
+      },
+      statusCode,
+      {},
+    );
+    expect(fetch).toHaveBeenCalled();
+    expect(fetched.status).toEqual(404);
+    expect(fetched.responseBody).toEqual({});
+  });
+});

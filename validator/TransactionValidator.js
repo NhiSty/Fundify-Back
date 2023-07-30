@@ -23,7 +23,6 @@ module.exports = {
       }
     }
     const currencies = Array.from(uniqueCurrencies);
-    console.log(currencies);
     // If the currency is not in the list of supported currencies, return false
     if (!currencies.includes(currency)) {
       return false;
