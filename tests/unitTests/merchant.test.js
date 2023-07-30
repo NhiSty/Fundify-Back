@@ -7,6 +7,9 @@ describe('Merchant email validator', () => {
   it('not valid email should return false', () => {
     expect(MerchantValidator.validateEmail('invalide@gmail')).toBe(false);
   });
+  it('not valid email with uppercase should return false', () => {
+    expect(MerchantValidator.validateEmail('Invalide@gmail.com')).toBe(false);
+  });
   it('empty email should return false', () => {
     expect(MerchantValidator.validateEmail('')).toBe(false);
   });
@@ -216,5 +219,23 @@ describe('Merchant is approved validator', () => {
   });
   it('incorrect value for approved should return false', () => {
     expect(MerchantValidator.validateApprovation('invalide data')).toBe(false);
+  });
+});
+
+describe('Merchant domain validator', () => {
+  it('valid domain should return true', () => {
+    expect(MerchantValidator.validateDomain('scnf.com')).toBe(true);
+  });
+  it('empty domain should return false', () => {
+    expect(MerchantValidator.validateDomain('')).toBe(false);
+  });
+  it('null domain should return false', () => {
+    expect(MerchantValidator.validateDomain(null)).toBe(false);
+  });
+  it('undefined domain should return false', () => {
+    expect(MerchantValidator.validateDomain(undefined)).toBe(false);
+  });
+  it('number domain should return false', () => {
+    expect(MerchantValidator.validateDomain(1)).toBe(false);
   });
 });
