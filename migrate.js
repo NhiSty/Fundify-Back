@@ -11,9 +11,11 @@ try {
       // Define the user data you want to add during migration
       const userAdmin = {
         username: 'admin',
-        email: 'admin@gmail.com',
+        email: 'serkan.dev67@gmail.com',
         password: 'Test1234!',
         isAdmin: true,
+        firstname: 'admin',
+        lastname: 'admin',
         // Add other attributes as needed
       };
 

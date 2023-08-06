@@ -67,7 +67,6 @@ app.use('/api', merchantRoutes.validateOrInvalidateMerchant);
 app.use('/api', transactionRoutes.getAllTransactions);
 app.use('/api', userRoutes.setAdmin);
 app.use('/api', userRoutes.getUsers);
-app.use('/api', userRoutes.sendConfirmationEmail);
 
 // Routes protégées par middleware de vérification du Bearer Token (seulement)
 app.use('/api', transactionRoutes.createTransaction);

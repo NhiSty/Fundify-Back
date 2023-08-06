@@ -5,7 +5,6 @@ const {
 const db = require('../db/index');
 const validator = require('../validator/UserValidator');
 const { checkRole } = require('../utils/authorization');
-const { sendEmail } = require('../utils/sendEmail');
 
 // eslint-disable-next-line consistent-return
 exports.getUsers = async (req, res, next) => {
@@ -82,21 +81,9 @@ exports.create = async (req, res) => {
       });
 
       if (userCreated) {
-        const response = await fetch('http://localhost:1337/api/users/sendConfirmMail', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: userCreated.email,
-          }),
-        });
-
-        if (response.status !== 200) {
-          return res.status(201).json(userCreated);
-        }
-        return res.sendStatus(500);
+        return res.status(201).json(userCreated);
       }
+      return res.sendStatus(500);
     } catch (e) {
       console.log(e);
       if (e instanceof UniqueConstraintError) {
