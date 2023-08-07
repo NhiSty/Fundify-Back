@@ -1,0 +1,23 @@
+version: "3.4"
+services:
+  my_frontend:
+    container_name: my_frontend
+    image: node:lts
+    working_dir: /var/www/html/app/
+    user: "node"
+    ports:
+      - 8080:80
+    volumes:
+      - ./:/var/www/html/app
+    tty: true
+    command: sh -c "npm i && npm run build"
+
+  my_nginx:
+    container_name: my_nginx
+    image: nginx:latest
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx-config:/etc/nginx/conf.d
+    depends_on:
+      - my_frontend

@@ -1,0 +1,81 @@
+version: '3.4'
+services:
+  node:
+    container_name: node
+    image: node:18-alpine
+    working_dir: /var/www/html/app/
+    user: node
+    volumes:
+      - ./:/var/www/html/app/
+    ports:
+      - 1337:1337
+    tty: true
+    stdin_open: true
+    command: sh -c "yarn && yarn dev"
+    networks:
+      - my_network
+      - my_network2
+
+  psp:
+    container_name: psp
+    image: node:18-alpine
+    working_dir: /var/www/html/app/
+    user: node
+    volumes:
+      - ./pspServer:/var/www/html/app/
+    ports:
+      - 1338:1338
+    tty: true
+    command: sh -c "yarn && yarn dev"
+    networks:
+      - my_network
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    ports:
+      - 8025:8025
+    networks:
+      - my_network2
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus:/etc/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+        - --storage.tsdb.path=/prometheus
+
+  database:
+    image: postgres:13-alpine
+    environment:
+      POSTGRES_DB: app
+      POSTGRES_PASSWORD: ChangeMe
+      POSTGRES_USER: nodejs
+    volumes:
+      - db_data:/var/lib/postgresql/data:rw
+    ports:
+      - 5432:5432
+    networks:
+        - my_network2
+
+  adminer:
+    image: adminer
+    depends_on:
+      - database
+    ports:
+      - 8080:8080
+    environment:
+      POSTGRES_USER: nodejs
+      POSTGRES_PASSWORD: ChangeMe
+      POSTGRES_DB: app
+    networks:
+        - my_network2
+
+volumes:
+  db_data:
+
+networks:
+  my_network: ~
+  my_network2: ~

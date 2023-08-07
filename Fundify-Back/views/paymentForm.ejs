@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Formulaire de paiement en ligne</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      form {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+      }
+      input[type="text"],
+      input[type="submit"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+      }
+      input[type="submit"] {
+        background-color: #4caf50;
+        color: #fff;
+        cursor: pointer;
+      }
+      input[type="submit"]:hover {
+        background-color: #45a049;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Formulaire de paiement en ligne</h1>
+    <form method="POST" id="paymentForm">
+      <label>Numéro de carte de crédit:</label>
+      <label>Prix du produit</label>
+      <% amount %>
+      <input
+        type="text"
+        name="amount"
+        required
+        disabled
+        value="<%= amount %>"
+      />
+      <label>Numéro de carte</label>
+      <input type="text" name="creditCardNumber" required />
+      <label>Date d'expiration:</label>
+      <input type="text" name="expirationDate" required />
+      <label>Code de sécurité (CVV):</label>
+      <input type="text" name="cvv" required />
+      <input type="hidden" name="url" value="<%= url %>" />
+      <input type="hidden" name="redirectUrl" value="<%= redirectUrl %>" />
+
+      <input type="submit" value="Valider le paiement" />
+    </form>
+  </body>
+  <script>
+    function getUUIDFromURL() {
+      const url = window.location.href;
+      const parts = url.split("/");
+      const uuid = parts[parts.length - 1];
+      return uuid;
+    }
+
+    document
+      .getElementById("paymentForm")
+      .addEventListener("submit", async (event) => {
+        event.preventDefault(); // Empêche la soumission automatique du formulaire
+
+        // Récupérer l'ID de l'URL (à remplacer avec votre propre méthode d'obtention de l'ID)
+        const transactionId = getUUIDFromURL();
+
+        // Récupérer les valeurs des champs du formulaire
+        const creditCardNumber = document.querySelector(
+          'input[name="creditCardNumber"]'
+        ).value;
+        const expirationDate = document.querySelector(
+          'input[name="expirationDate"]'
+        ).value;
+        const cvv = document.querySelector('input[name="cvv"]').value;
+        const url = document.querySelector('input[name="url"]').value;
+        const amount = document.querySelector('input[name="amount"]').value;
+        const redirectUrl = document.querySelector(
+          'input[name="redirectUrl"]'
+        ).value;
+
+        // Données du formulaire à envoyer dans la requête POST
+        const formData = {
+          transactionId: transactionId,
+          creditCardNumber: creditCardNumber,
+          expirationDate: expirationDate,
+          cvv: cvv,
+          amount: parseFloat(amount),
+        };
+        // Effectuer une requête POST en utilisant fetch()
+        try {
+          const response = await fetch(url, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          });
+
+          if (response.ok) {
+            // Rediriger l'utilisateur vers la page de confirmation
+            window.location.href = redirectUrl;
+            // Traitez la réponse ici si nécessaire
+          }
+        } catch (error) {
+          console.log("Erreur lors du paiement :", error);
+          // Traitez l'erreur ici si nécessaire
+        }
+      });
+  </script>
+</html>
