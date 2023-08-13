@@ -1,33 +1,5 @@
 version: '3.4'
 services:
-  vue:
-    container_name: vue
-    image: node:18-alpine
-    working_dir: /var/www/html/app/
-    user: node
-    volumes:
-      - ./Fundify-Backoffice:/var/www/html/app/
-    ports:
-      - 3000:3000
-    command: sh -c "yarn && yarn dev"
-    networks:
-      - my_network
-      - my_network2
-
-  vue2:
-    container_name: vue2
-    image: node:18-alpine
-    working_dir: /var/www/html/app/
-    user: node
-    volumes:
-      - ./Fundify-Front:/var/www/html/app/
-    ports:
-      - 3001:3001
-    command: sh -c "yarn && yarn dev"
-    networks:
-      - my_network
-      - my_network2
-
   node:
     container_name: node
     image: node:18-alpine
@@ -36,7 +8,7 @@ services:
     volumes:
       - ./Fundify-Back:/var/www/html/app/
     ports:
-      - 1337:1337
+      - "1337:1337"
     tty: true
     stdin_open: true
     command: sh -c "yarn && yarn dev"
@@ -52,18 +24,11 @@ services:
     volumes:
       - ./Fundify-Back/pspServer:/var/www/html/app/
     ports:
-      - 1338:1338
+      - "1338:1338"
     tty: true
     command: sh -c "yarn && yarn dev"
     networks:
       - my_network
-
-  mailhog:
-    image: mailhog/mailhog:latest
-    ports:
-      - 8025:8025
-    networks:
-      - my_network2
 
   database:
     image: postgres:13-alpine
@@ -74,7 +39,7 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data:rw
     ports:
-      - 5432:5432
+      - "5432:5432"
     networks:
       - my_network2
 
@@ -83,7 +48,7 @@ services:
     depends_on:
       - database
     ports:
-      - 8080:8080
+      - "8080:808"
     environment:
       POSTGRES_USER: nodejs
       POSTGRES_PASSWORD: ChangeMe
@@ -95,26 +60,18 @@ services:
     container_name: nginx
     image: nginx:latest
     volumes:
-      - ./Fundify-Backoffice/dist:/usr/share/nginx/html
-      - ./Fundify-Backoffice/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nhisty/dist:/usr/share/nginx/html
+      - ./Fundify-Front/dist:/usr/share/nginx/html/merchant
+      - ./nhisty/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./fullchain.pem:/etc/nginx/fullchain.pem
+      - ./nhistywildcare.key:/etc/nginx/nhistywildcare.key
+      - ./Fundify-Front/dist:/usr/share/nginx/front
+      - ./Fundify-Back/:/usr/share/nginx/back
+      - ./Fundify-Back/pspServer:/usr/share/nginx/pspServer
     ports:
-      - 80:80
-    depends_on:
-      - vue
-    networks:
-      - my_network
-      - my_network2
-
-  nginx2:
-    container_name: nginx2
-    image: nginx:latest
-    volumes:
-      - ./Fundify-Front/dist:/usr/share/nginx/html
-      - ./Fundify-Front/nginx/nginx.conf:/etc/nginx/nginx.conf
-    ports:
-      - 81:80
-    depends_on:
-      - vue
+      - "80:80"
+      - "443:443"
+    restart: always
     networks:
       - my_network
       - my_network2
