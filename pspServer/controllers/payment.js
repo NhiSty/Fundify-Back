@@ -5,10 +5,6 @@ exports.verifications = async (req, res) => {
     amount, currency, transactionId, operationId,
   } = req.body;
 
-  console.log({
-    amount, currency, transactionId, operationId,
-  });
-
   res.sendStatus(200);
 
   // Simule un délai d'attente de 5 secondes
@@ -20,11 +16,11 @@ exports.verifications = async (req, res) => {
       transactionId,
       operationId,
     });
-  }, 10000);
+  }, 5000);
 };
 
 function sendDoneNotification(body) {
-  const url = process.env.URL_NOTIFICATIONS;
+  const url = process.env.URL_NOTIF_PSP;
 
   fetch(url, {
     method: 'POST',

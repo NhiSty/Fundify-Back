@@ -2,6 +2,7 @@ const {
   Model,
   DataTypes,
 } = require('sequelize');
+const sendEmail = require('../../utils/sendEmail');
 
 // eslint-disable-next-line func-names
 module.exports = function (connection) {
@@ -88,6 +89,19 @@ module.exports = function (connection) {
 
   User.addHook('beforeCreate', encryptPassword);
   User.addHook('beforeUpdate', encryptPassword);
+
+  // function qui envoi un mail lorsqu'un user est créé (admin ou marchant)
+  /*
+    User.addHook('afterCreate', async (user) => {
+      try {
+        const emailTo = user.email;
+        const who = `${user.firstname} ${user.lastname}`;
+        await sendEmail(emailTo, who);
+      } catch (error) {
+        console.log(error);
+      }
+    });
+   */
 
   return User;
 };

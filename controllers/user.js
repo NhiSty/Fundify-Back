@@ -4,14 +4,13 @@ const {
 } = require('sequelize');
 const db = require('../db/index');
 const validator = require('../validator/UserValidator');
-const { checkRole } = require('../utils/authorization');
-const { sendEmail } = require('../utils/sendEmail');
 
 // eslint-disable-next-line consistent-return
 exports.getUsers = async (req, res, next) => {
   try {
-    checkRole(req, res, 'admin');
-
+    if (req.role !== 'admin') {
+      return res.sendStatus(401);
+    }
     const users = await db.User.findAll({ where: { merchantId: null } });
     return res.status(200).json(users);
   } catch (error) {
@@ -82,21 +81,9 @@ exports.create = async (req, res) => {
       });
 
       if (userCreated) {
-        const response = await fetch('http://localhost:1337/api/users/sendConfirmMail', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: userCreated.email,
-          }),
-        });
-
-        if (response.status !== 200) {
-          return res.status(201).json(userCreated);
-        }
-        return res.sendStatus(500);
+        return res.status(201).json(userCreated);
       }
+      return res.sendStatus(500);
     } catch (e) {
       console.log(e);
       if (e instanceof UniqueConstraintError) {
@@ -163,17 +150,10 @@ exports.login = async (req, res) => {
       sign = await user.generateToken();
     }
 
-    return res.cookie(
-      'token',
-      sign,
-      {
-        httpOnly: false,
-        secure: false,
-        sameSite: 'None',
-      },
-    )
-      .status(200)
-      .json();
+    return res.json({
+      token: sign,
+    })
+      .status(200);
   } catch (e) {
     // eslint-disable-next-line no-console
     console.log(e);
@@ -187,7 +167,9 @@ exports.setAdmin = async (req, res, next) => {
   const { userId } = req.body;
 
   try {
-    checkRole(req, res, 'admin');
+    if (req.role !== 'admin') {
+      return res.sendStatus(401);
+    }
 
     if (!userId) {
       return res.sendStatus(422);

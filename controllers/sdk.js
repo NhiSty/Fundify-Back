@@ -9,12 +9,12 @@ const extractClientSecretCookie = (cookieString) => {
 exports.sendForm = async (req, res) => {
   try {
     if (!req.headers.cookie) {
-      return res.send('<h1>UNAUTHORIZED</h1>');
+      return res.send('<h1>1 UNAUTHORIZED</h1>');
     }
     const clientSecret = extractClientSecretCookie(req.headers.cookie);
 
     if (!clientSecret) {
-      return res.send('<h1>UNAUTHORIZED</h1>');
+      return res.send('<h1>2 UNAUTHORIZED</h1>');
     }
 
     const transactionId = req.params.id;
@@ -23,20 +23,24 @@ exports.sendForm = async (req, res) => {
       return res.status(404).send('Transaction non trouvée');
     }
 
+    let credentials;
+
     const merchant = await db.Merchant.findByPk(transaction.merchantId);
     if (merchant) {
-      const credentials = await db.Credential.findByPk(merchant.credentialsId);
+      credentials = await db.Credential.findByPk(merchant.credentialsId);
       if (credentials) {
         if (credentials.clientSecret !== clientSecret) {
-          return res.send('<h1>UNAUTHORIZED</h1>');
+          return res.send('<h1>3 UNAUTHORIZED</h1>');
         }
       }
     }
 
     return res.render('paymentForm', {
       amount: transaction.amount,
-      url: process.env.URL_OPERATION,
+      url: process.env.PAYMENT_URL_OPERATIONS,
       redirectUrl: merchant.confirmationRedirectUrl,
+      id: merchant.id,
+      clientToken: credentials.clientToken,
     });
   } catch (err) {
     console.error(err);
