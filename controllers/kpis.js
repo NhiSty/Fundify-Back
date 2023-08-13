@@ -1,11 +1,12 @@
-const { checkRole } = require('../utils/authorization');
 const TransactionMDb = require('../mongoDb/models/Transaction');
 const MerchantMDb = require('../mongoDb/models/Merchant');
 
 // eslint-disable-next-line consistent-return
 exports.getTransactionsStatusKPIS = async (req, res, next) => {
   try {
-    checkRole(req, res, 'admin');
+    if (req.role !== 'admin') {
+      return res.sendStatus(401);
+    }
 
     const countTransactionsByStatus = await TransactionMDb.aggregate([
       {
@@ -24,8 +25,9 @@ exports.getTransactionsStatusKPIS = async (req, res, next) => {
 // eslint-disable-next-line consistent-return
 exports.getMerchanAcceptedAndInWaiting = async (req, res, next) => {
   try {
-    checkRole(req, res, 'admin');
-
+    if (req.role !== 'admin') {
+      return res.sendStatus(401);
+    }
     const countMerchantsByStatus = await MerchantMDb.aggregate([
       {
         $group: {
@@ -43,8 +45,9 @@ exports.getMerchanAcceptedAndInWaiting = async (req, res, next) => {
 // eslint-disable-next-line consistent-return
 exports.getMerchantRegisteredByDate = async (req, res, next) => {
   try {
-    checkRole(req, res, 'admin');
-
+    if (req.role !== 'admin') {
+      return res.sendStatus(401);
+    }
     const getFormattedDate = (date) => {
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');

@@ -61,6 +61,8 @@
       <input type="text" name="cvv" required />
       <input type="hidden" name="url" value="<%= url %>" />
       <input type="hidden" name="redirectUrl" value="<%= redirectUrl %>" />
+      <input type="hidden" name="id" value="<%= id %>" />
+      <input type="hidden" name="clientToken" value="<%= clientToken %>" />
 
       <input type="submit" value="Valider le paiement" />
     </form>
@@ -95,6 +97,15 @@
           'input[name="redirectUrl"]'
         ).value;
 
+        const id = document.querySelector(
+                'input[name="id"]'
+        ).value;
+
+        const clientToken = document.querySelector(
+                'input[name="clientToken"]'
+        ).value;
+
+
         // Données du formulaire à envoyer dans la requête POST
         const formData = {
           transactionId: transactionId,
@@ -109,6 +120,7 @@
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              Authorization: `Bearer ${id}:${clientToken}`
             },
             body: JSON.stringify(formData),
           });

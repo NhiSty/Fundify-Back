@@ -3,13 +3,13 @@ const token = require('token');
 const db = require('../db/index');
 const merchantValidator = require('../validator/MerchantValidator');
 const TransactionMDb = require('../mongoDb/models/Transaction');
-const { authorize, checkRole } = require('../utils/authorization');
 
 // eslint-disable-next-line consistent-return
 exports.getMerchants = async (req, res, next) => {
   try {
-    checkRole(req, res, 'admin');
-
+    if (req.role !== 'admin') {
+      return res.sendStatus(401);
+    }
     const merchants = await db.Merchant.findAll();
 
     const results = merchants.map((merchant) => {
@@ -54,8 +54,6 @@ exports.getMerchantTransactionById = async (req, res, next) => {
   const { id, transactionId } = req.params;
 
   try {
-    authorize(req, res, id);
-
     if (!id || !transactionId) {
       return res.sendStatus(404);
     }
@@ -74,7 +72,9 @@ exports.validateOrInvalidateMerchant = async (req, res, next) => {
   const { id: merchantId } = req.params;
 
   try {
-    checkRole(req, res, 'admin');
+    if (req.role !== 'admin') {
+      return res.sendStatus(401);
+    }
 
     if (!merchantId) {
       throw new Error('422 Unprocessable Entity');
@@ -83,10 +83,6 @@ exports.validateOrInvalidateMerchant = async (req, res, next) => {
     const merchantToApprove = await db.Merchant.findOne({ where: { id: merchantId } });
     if (!merchantToApprove) {
       throw new Error('404 Not Found');
-    }
-
-    if (merchantToApprove.approved === approved) {
-      throw new Error('422 Unprocessable Entity');
     }
 
     if (!approved) {
@@ -140,8 +136,6 @@ exports.regenerateCredentials = async (req, res, next) => {
       throw new Error('422 Unprocessable Entity');
     }
 
-    authorize(req, res, merchantId);
-
     const merchantToRegenerateCredentials = await db.Merchant.findOne({ where: { id: merchantId } });
     if (!merchantToRegenerateCredentials) {
       throw new Error('404 Not Found');
@@ -175,8 +169,6 @@ exports.getMerchantTransactions = async (req, res, next) => {
   const merchantId = req.params.id;
 
   try {
-    authorize(req, res, merchantId);
-
     if (!merchantId) {
       throw new Error('422 Unprocessable Entity');
     }
@@ -210,8 +202,6 @@ exports.updateMerchantAccount = async (req, res, next) => {
   const { approved, ...merchantData } = req.body;
 
   try {
-    authorize(req, res, merchantId);
-
     if (!merchantId) {
       return res.sendStatus(422);
     }
@@ -274,11 +264,6 @@ exports.getMerchantAccount = async (req, res, next) => {
   const merchantId = req.params.id;
 
   try {
-    console.log('je suis ici1');
-
-    authorize(req, res, merchantId);
-    console.log('je suis ici2');
-
     if (req.role !== 'admin') {
       if (req.merchantId !== merchantId) {
         throw new Error('401 Unauthorized');

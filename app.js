@@ -48,7 +48,7 @@ app.use((req, res, next) => {
 // Pas de protection sur ces routes
 app.use('/api/auth', userRoutes.login);
 app.use('/api/auth', userRoutes.create);
-app.use('/api/', sdkRoutes);
+app.use('/api', sdkRoutes);
 app.use('/api', webhooks);
 
 // Routes protégées par le middleware d'authentification (seulement)
@@ -56,6 +56,7 @@ app.use('/api', operationRoutes.getTransactionOperations);
 app.use('/api', merchantRoutes.getMerchantTransactionById);
 app.use('/api', merchantRoutes.getMerchant);
 app.use('/api', merchantRoutes.updateMerchantAccount);
+app.use('/api', merchantRoutes.regenerateCredentials);
 app.use('/api', transactionRoutes.getTransaction);
 app.use('/api', userRoutes.updateUser);
 app.use('/api/auth', userRoutes.logout);

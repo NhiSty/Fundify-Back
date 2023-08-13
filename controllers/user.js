@@ -4,13 +4,13 @@ const {
 } = require('sequelize');
 const db = require('../db/index');
 const validator = require('../validator/UserValidator');
-const { checkRole } = require('../utils/authorization');
 
 // eslint-disable-next-line consistent-return
 exports.getUsers = async (req, res, next) => {
   try {
-    checkRole(req, res, 'admin');
-
+    if (req.role !== 'admin') {
+      return res.sendStatus(401);
+    }
     const users = await db.User.findAll({ where: { merchantId: null } });
     return res.status(200).json(users);
   } catch (error) {
@@ -150,17 +150,10 @@ exports.login = async (req, res) => {
       sign = await user.generateToken();
     }
 
-    return res.cookie(
-      'token',
-      sign,
-      {
-        httpOnly: false,
-        secure: false,
-        sameSite: 'None',
-      },
-    )
-      .status(200)
-      .json();
+    return res.json({
+      token: sign,
+    })
+      .status(200);
   } catch (e) {
     // eslint-disable-next-line no-console
     console.log(e);
@@ -174,7 +167,9 @@ exports.setAdmin = async (req, res, next) => {
   const { userId } = req.body;
 
   try {
-    checkRole(req, res, 'admin');
+    if (req.role !== 'admin') {
+      return res.sendStatus(401);
+    }
 
     if (!userId) {
       return res.sendStatus(422);

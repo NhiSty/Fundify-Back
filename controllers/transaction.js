@@ -2,10 +2,6 @@ const db = require('../db/index');
 const TransactionMDb = require('../mongoDb/models/Transaction');
 
 const TransactionValidator = require('../validator/TransactionValidator');
-const {
-  authorize,
-  checkRole
-} = require('../utils/authorization');
 require('dotenv')
   .config();
 
@@ -13,7 +9,7 @@ require('dotenv')
 exports.createTransaction = async (req, res, next) => {
   const {
     merchantId,
-    userId
+    userId,
   } = req.body;
   const amout = parseFloat(req.body.amount);
 
@@ -22,8 +18,6 @@ exports.createTransaction = async (req, res, next) => {
   }
 
   try {
-    authorize(req, res, merchantId, false);
-
     if (!userId) {
       throw new Error('422 Unprocessable Entity');
     }
@@ -52,8 +46,6 @@ exports.createTransaction = async (req, res, next) => {
 
     const credentials = await db.Credential.findByPk(merchantToSend.credentialsId);
 
-    console.log(process.env.URL_PAYMENT_FORM);
-
     return res.status(201)
       .json({
         url: `${process.env.URL_PAYMENT_FORM}/${transaction.id}`,
@@ -67,7 +59,9 @@ exports.createTransaction = async (req, res, next) => {
 // eslint-disable-next-line consistent-return
 exports.getAllTransactions = async (req, res, next) => {
   try {
-    checkRole(req, res, 'admin');
+    if (req.role !== 'admin') {
+      return res.sendStatus(401);
+    }
 
     const transactions = await TransactionMDb.find({});
     return res.status(200)
@@ -91,8 +85,7 @@ exports.getTransaction = async (req, res, next) => {
       return res.status(404)
         .json();
     }
-    const { merchantId } = transaction;
-    authorize(req, res, merchantId);
+
     return res.status(200)
       .json(transaction);
   } catch (error) {
@@ -110,8 +103,6 @@ exports.getMerchantTransactions = async (req, res, next) => {
   }
 
   try {
-    authorize(req, res, merchantId);
-
     const merchant = await db.Merchant.findByPk(merchantId);
 
     if (!merchant) {

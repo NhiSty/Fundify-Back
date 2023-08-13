@@ -1,13 +1,11 @@
 const express = require('express');
-const bearerMiddleware = require('../middleware/bearerMiddleware');
-const authMiddleware = require('../middleware/authMiddleware');
 
 const router = express.Router();
-
 const transactionCtrl = require('../controllers/transaction');
+const checkAutho = require('../middleware/checkAutho');
 
 module.exports = {
-  getTransaction: router.get('/transaction/:id', authMiddleware, transactionCtrl.getTransaction),
-  getAllTransactions: router.get('/transactions', authMiddleware, transactionCtrl.getAllTransactions),
-  createTransaction: router.post('/transactions', authMiddleware, bearerMiddleware, transactionCtrl.createTransaction),
+  getTransaction: router.get('/transaction/:id', checkAutho(true, true), transactionCtrl.getTransaction),
+  getAllTransactions: router.get('/transactions', checkAutho(true, true), transactionCtrl.getAllTransactions),
+  createTransaction: router.post('/transactions', checkAutho(true, true), transactionCtrl.createTransaction),
 };

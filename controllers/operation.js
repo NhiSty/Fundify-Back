@@ -41,7 +41,7 @@ exports.createOperation = async (req, res) => {
   }
 
   try {
-    await fetch('http://psp:1338/api/psp/transactions/verifications', {
+    await fetch(process.env.URL_PSP_VERIFICATION, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
