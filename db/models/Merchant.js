@@ -60,6 +60,11 @@ module.exports = function (connection) {
       },
       allowNull: true,
     },
+    autoCapture: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+    },
   }, {
     sequelize: connection,
     modelName: 'Merchant',

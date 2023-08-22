@@ -33,7 +33,8 @@ module.exports = (connection) => {
         allowNull: false,
       },
       status: {
-        type: DataTypes.ENUM('created', 'captured', 'waiting_refund', 'partial_refunded', 'refunded', 'cancelled'),
+        // eslint-disable-next-line max-len
+        type: DataTypes.ENUM('created', 'captured', 'authorized', 'waiting_refund', 'partial_refunded', 'refunded', 'cancelled'),
         defaultValue: 'created',
       },
       deletedAt: {

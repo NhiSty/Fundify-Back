@@ -13,7 +13,7 @@ module.exports = (connection) => {
       primaryKey: true,
     },
     type: {
-      type: DataTypes.ENUM('capture', 'refund'),
+      type: DataTypes.ENUM('capture', 'refund', 'authorization'),
       allowNull: false,
     },
     amount: {

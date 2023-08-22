@@ -26,6 +26,11 @@ const merchantSchema = new mongoose.Schema({
     required: true,
     default: false,
   },
+  autoCapture: {
+    type: Boolean,
+    required: true,
+    default: true,
+  },
   // Autres champs de l'utilisateur que vous souhaitez enregistrer
 }, {
   timestamps: true,
