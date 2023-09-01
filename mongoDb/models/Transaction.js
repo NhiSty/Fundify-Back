@@ -65,6 +65,10 @@ const transactionSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  outstandingBalance: {
+    type: Number,
+    required: true,
+  },
   refundAmountAvailable: {
     type: Number,
     required: true,
@@ -75,7 +79,7 @@ const transactionSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['created', 'captured', 'authorized', 'waiting_refund', 'partial_refunded', 'refunded', 'cancelled'],
+    enum: ['created', 'captured', 'partial_captured', 'authorized', 'waiting_refund', 'partial_refunded', 'refunded', 'cancelled'],
     default: 'created',
   },
 });

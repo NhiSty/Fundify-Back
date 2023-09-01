@@ -34,7 +34,7 @@ module.exports = (connection) => {
       },
       status: {
         // eslint-disable-next-line max-len
-        type: DataTypes.ENUM('created', 'captured', 'authorized', 'waiting_refund', 'partial_refunded', 'refunded', 'cancelled'),
+        type: DataTypes.ENUM('created', 'captured', 'partial_captured', 'authorized', 'waiting_refund', 'partial_refunded', 'refunded', 'cancelled'),
         defaultValue: 'created',
       },
       deletedAt: {
@@ -63,6 +63,7 @@ module.exports = (connection) => {
       amount: transaction.amount,
       currency: transaction.currency,
       status: transaction.status,
+      outstandingBalance: transaction.amount,
       refundAmountAvailable: transaction.amount,
       statusHist: [
         {

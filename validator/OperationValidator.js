@@ -8,9 +8,24 @@ module.exports = {
   validateAmount: async (amount, transactionId) => {
     const transactionMdb = await TransactionMDb.findOne({ transactionId });
 
-    if (!amount || amount === '' || typeof (amount) !== 'number' || amount > transactionMdb.refundAmountAvailable) {
+    if (!amount || amount === '' || typeof (amount) !== 'number') {
       return false;
     }
+
+    if (transactionMdb.status === 'partial_captured' || transactionMdb.status === 'authorized') {
+      if (transactionMdb.outstandingBalance - amount >= 0) {
+        return true;
+      }
+      return false;
+    }
+
+    if (transactionMdb.status === 'partial_refunded' || transactionMdb.status === 'captured') {
+      if (transactionMdb.refundAmountAvailable - amount >= 0) {
+        return true;
+      }
+      return false;
+    }
+
     return /^(\d{1,8})(\.\d{1,2})?$/.test(amount);
   },
   validateStatus: (status) => {

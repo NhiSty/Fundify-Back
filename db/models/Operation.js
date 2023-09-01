@@ -2,6 +2,7 @@ const { Model, DataTypes } = require('sequelize');
 const OperationStatusHist = require('./OperationStatusHist');
 const TransactionStatusHist = require('./TransactionStatusHist');
 const TransactionMDb = require('../../mongoDb/models/Transaction');
+const Transaction = require('./Transaction');
 
 module.exports = (connection) => {
   class Operation extends Model {}
@@ -69,19 +70,24 @@ module.exports = (connection) => {
             },
           ],
         },
-        ...(operation.type === 'refund' && {
+      },
+    });
+
+    if (operation.type === 'refund') {
+      await TransactionMDb.updateOne({ transactionId: operation.transactionId }, {
+        $set: {
+          status: 'waiting_refund',
+        },
+        $addToSet: {
           statusHist: [
             {
               status: 'waiting_refund',
               date: Date.now(),
             },
           ],
-        }),
-      },
-      $set: {
-        ...(operation.type === 'refund' && { status: 'waiting_refund' }),
-      },
-    });
+        },
+      });
+    }
   });
 
   // Après mise à jour d'une opération (Postgres) on met à jour l'opération correspondante (MongoDB)
@@ -90,6 +96,8 @@ module.exports = (connection) => {
       operationId: operation.id,
       status: operation.status,
     });
+
+    const transaction = await TransactionMDb.findOne({ transactionId: operation.transactionId });
 
     const refundAmountAvailable = await TransactionMDb.aggregate([
       { $match: { transactionId: operation.transactionId } },
@@ -112,42 +120,74 @@ module.exports = (connection) => {
       },
     ]).exec();
 
-    let trxStatus = 'captured';
-    const operationDone = operation.status;
+    const operationIsDone = operation.status === 'done';
     const operationIsCapture = operation.type === 'capture';
+    const operationIsRefund = operation.type === 'refund';
     const allIsRefunded = refundAmountAvailable[0].remainingAmount === 0;
+    const trxIsCompletelyCaptured = transaction.outstandingBalance - operation.amount === 0;
 
-    if (!operationIsCapture && operationDone && allIsRefunded) {
-      trxStatus = 'refunded';
-    }
+    if (operationIsDone) {
+      let trxStatus = '';
 
-    if (!operationIsCapture && operationDone && !allIsRefunded) {
-      trxStatus = 'partial_refunded';
-    }
+      // Concerne les opérations de type authorization
+      if (operation.type === 'authorization') {
+        trxStatus = 'authorized';
+      }
 
-    await TransactionMDb.updateOne({ transactionId: operation.transactionId, 'operations.operationId': operation.id }, {
-      $set: {
-        'operations.$.status': operation.status,
-        refundAmountAvailable: refundAmountAvailable[0].remainingAmount,
-        ...(operation.status === 'done' && { status: trxStatus }),
-      },
-      $addToSet: {
-        'operations.$.statusHist': [
-          {
-            status: operation.status,
-            date: Date.now(),
-          },
-        ],
-        ...((operation.status === 'done') && {
+      // Concerne les opérations de type capture
+      if (operationIsCapture) {
+        if (!trxIsCompletelyCaptured) {
+          trxStatus = 'partial_captured';
+        } else { trxStatus = 'captured'; }
+      }
+
+      // Concerne les opérations de type refund
+      if (operationIsRefund) {
+        if (allIsRefunded) {
+          trxStatus = 'refunded';
+        } else {
+          trxStatus = 'partial_refunded';
+        }
+      }
+
+      await Transaction(connection).update({ status: trxStatus }, { where: { id: operation.transactionId } });
+      await TransactionStatusHist(connection).create({ transactionId: operation.transactionId, status: trxStatus });
+
+      await TransactionMDb.updateOne({ transactionId: operation.transactionId, 'operations.operationId': operation.id }, {
+        $set: {
+          'operations.$.status': operation.status,
+          refundAmountAvailable: refundAmountAvailable[0].remainingAmount,
+        },
+        $addToSet: {
+          'operations.$.statusHist': [
+            {
+              status: operation.status,
+              date: Date.now(),
+            },
+          ],
+        },
+      });
+
+      // eslint-disable-next-line max-len
+      const canUpdateOutstandingBalance = operation.type === 'capture' && transaction.outstandingBalance >= operation.amount && transaction.outstandingBalance > 0;
+
+      await TransactionMDb.updateOne({ transactionId: operation.transactionId }, {
+        $set: {
+          status: trxStatus,
+        },
+        $inc: {
+          ...(canUpdateOutstandingBalance && { outstandingBalance: -parseInt(operation.amount, 10) }),
+        },
+        $addToSet: {
           statusHist: [
             {
               status: trxStatus,
               date: Date.now(),
             },
           ],
-        }),
-      },
-    });
+        },
+      });
+    }
   });
 
   return Operation;

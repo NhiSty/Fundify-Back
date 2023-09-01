@@ -16,7 +16,7 @@ exports.verifications = async (req, res) => {
       transactionId,
       operationId,
     });
-  }, 5000);
+  }, 10000);
 };
 
 function sendDoneNotification(body) {
@@ -32,7 +32,7 @@ function sendDoneNotification(body) {
   })
     .then((response) => {
       if (response.status === 200) {
-        console.log('Notification de paiement envoyée avec succès à votre API.');
+        console.log(`Notification de paiement envoyée à votre API pour la transaction ${body.transactionId}. Opération ${body.operationId}.`);
       } else {
         throw new Error('Erreur lors de l\'envoi de la notification de paiement à votre API.');
       }

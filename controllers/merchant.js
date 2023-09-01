@@ -3,6 +3,7 @@ const token = require('token');
 const db = require('../db/index');
 const merchantValidator = require('../validator/MerchantValidator');
 const TransactionMDb = require('../mongoDb/models/Transaction');
+const sendEmail = require('../utils/sendEmail');
 
 // eslint-disable-next-line consistent-return
 exports.getMerchants = async (req, res, next) => {
