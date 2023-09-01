@@ -24,4 +24,4 @@ module.exports = function requestPspCheck(payload) {
       notificationUrl: process.env.URL_NOTIF_PSP,
     }),
   });
-}
+};
