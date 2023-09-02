@@ -8,9 +8,9 @@ exports.verifications = async (req, res) => {
   res.sendStatus(200);
 
   // Simule un délai d'attente de 5 secondes
-  setTimeout(() => {
+  setTimeout(async () => {
     // eslint-disable-next-line no-use-before-define
-    sendDoneNotification({
+    await sendDoneNotification({
       amount,
       currency,
       transactionId,
@@ -19,18 +19,26 @@ exports.verifications = async (req, res) => {
   }, 5000);
 };
 
-function sendDoneNotification(body) {
+async function sendDoneNotification(body) {
   const url = process.env.URL_NOTIF_PSP;
 
-  fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': process.env.API_SECRET_KEY,
-    },
-    body: JSON.stringify(body),
-  })
-    .then((response) => {
+  try {
+    const request = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.API_SECRET_KEY,
+      },
+      body: JSON.stringify(body),
+    });
+
+    console.log(request);
+
+    const response = await request.json();
+    console.log(response);
+
+    /*
+
       if (response.status === 200) {
         console.log('Notification de paiement envoyée avec succès à votre API.');
       } else {
@@ -40,4 +48,9 @@ function sendDoneNotification(body) {
     .catch((error) => {
       console.error(error.message);
     });
+}
+     */
+  } catch (e) {
+    console.log(e);
+  }
 }
