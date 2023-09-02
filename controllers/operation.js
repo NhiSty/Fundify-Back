@@ -5,9 +5,9 @@ const requestPspCheck = require('../utils/requestPspCheck');
 require('dotenv').config();
 
 exports.createOperation = async (req, res) => {
-  const { transactionId } = req.body;
-  const { merchantId } = req;
+  const { transactionId, merchantId } = req.body;
 
+  console.log('req.body', req);
   if (!merchantId) {
     return res.sendStatus(422);
   }
@@ -69,7 +69,6 @@ exports.createOperation = async (req, res) => {
       amount: restBody.amount,
     });
   }
-
   try {
     // Demande de verif au PSP
     await requestPspCheck({
@@ -145,7 +144,6 @@ exports.operationWebhook = async (notificationData) => {
           type: 'capture',
           transactionId: notificationData.transactionId,
           amount: notificationData.amount,
-          deletedAt: Date.UTC(2011, 11, 11, 11, 11, 11),
         });
 
         // Demande de verif au PSP
