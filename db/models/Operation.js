@@ -145,42 +145,42 @@ module.exports = (connection) => {
     const operationIsRefund = operation.type === 'refund';
     const allIsRefunded = refundAmountAvailable[0].remainingAmount === 0;
     const trxIsCompletelyCaptured = transaction.outstandingBalance - operation.amount === 0;
-
-    if (operationIsDone) {
-      let trxStatus = '';
-
+    const getTransactionStatus = () => {
       // Concerne les opérations de type authorization
       if (operation.type === 'authorization') {
-        trxStatus = 'authorized';
+        return 'authorized';
       }
 
       // Concerne les opérations de type capture
       if (operationIsCapture) {
         if (!trxIsCompletelyCaptured) {
-          trxStatus = 'partial_captured';
-        } else { trxStatus = 'captured'; }
+          return 'partial_captured';
+        } return 'captured';
       }
 
       // Concerne les opérations de type refund
       if (operationIsRefund) {
         if (allIsRefunded) {
-          trxStatus = 'refunded';
-        } else {
-          trxStatus = 'partial_refunded';
+          return 'refunded';
         }
+        return 'partial_refunded';
       }
 
-      await Transaction(connection).update({ status: trxStatus }, { where: { id: operation.transactionId } });
-      await TransactionStatusHist(connection).create({ transactionId: operation.transactionId, status: trxStatus });
+      return 'uknown';
+    };
+
+    if (operationIsDone) {
+      await Transaction(connection).update({ status: getTransactionStatus() }, { where: { id: operation.transactionId } });
+      await TransactionStatusHist(connection).create({ transactionId: operation.transactionId, status: getTransactionStatus() });
 
       await TransactionMDb.updateOne({ transactionId: operation.transactionId }, {
         $set: {
-          status: trxStatus,
+          status: getTransactionStatus(),
         },
         $addToSet: {
           statusHist: [
             {
-              status: trxStatus,
+              status: getTransactionStatus(),
               date: Date.now(),
             },
           ],
