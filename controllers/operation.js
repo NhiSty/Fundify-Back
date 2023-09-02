@@ -5,9 +5,9 @@ const requestPspCheck = require('../utils/requestPspCheck');
 require('dotenv').config();
 
 exports.createOperation = async (req, res) => {
-  const { transactionId, merchantId } = req.body;
+  const { transactionId, merchantId: id } = req.body;
+  const merchantId = id || req.merchantId;
 
-  console.log('req.body', req);
   if (!merchantId) {
     return res.sendStatus(422);
   }

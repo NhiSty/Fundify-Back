@@ -122,7 +122,7 @@ module.exports = (connection) => {
     const canUpdateOutstandingBalance = operation.type === 'capture' && transaction.outstandingBalance >= operation.amount && transaction.outstandingBalance > 0;
 
     // Mise à jour des status des opérations
-    await TransactionMDb.updateOne({ transactionId: operation.transactionId, 'operations.operationId': operation.id }, {
+    const res = await TransactionMDb.findOneAndUpdate({ transactionId: operation.transactionId, 'operations.operationId': operation.id }, {
       $set: {
         'operations.$.status': operation.status,
         refundAmountAvailable: refundAmountAvailable[0].remainingAmount,
@@ -138,13 +138,14 @@ module.exports = (connection) => {
           },
         ],
       },
-    });
+    }, { new: true });
 
     const operationIsDone = operation.status === 'done';
     const operationIsCapture = operation.type === 'capture';
     const operationIsRefund = operation.type === 'refund';
     const allIsRefunded = refundAmountAvailable[0].remainingAmount === 0;
-    const trxIsCompletelyCaptured = transaction.outstandingBalance - operation.amount === 0;
+    const trxIsCompletelyCaptured = res.outstandingBalance === 0;
+
     const getTransactionStatus = () => {
       // Concerne les opérations de type authorization
       if (operation.type === 'authorization') {
