@@ -99,6 +99,21 @@ module.exports = (connection) => {
 
     const transaction = await TransactionMDb.findOne({ transactionId: operation.transactionId });
 
+    // Mise à jour des status des opérations
+    await TransactionMDb.updateOne({ transactionId: operation.transactionId, 'operations.operationId': operation.id }, {
+      $set: {
+        'operations.$.status': operation.status,
+      },
+      $addToSet: {
+        'operations.$.statusHist': [
+          {
+            status: operation.status,
+            date: Date.now(),
+          },
+        ],
+      },
+    });
+
     const refundAmountAvailable = await TransactionMDb.aggregate([
       { $match: { transactionId: operation.transactionId } },
       {
@@ -153,27 +168,13 @@ module.exports = (connection) => {
       await Transaction(connection).update({ status: trxStatus }, { where: { id: operation.transactionId } });
       await TransactionStatusHist(connection).create({ transactionId: operation.transactionId, status: trxStatus });
 
-      await TransactionMDb.updateOne({ transactionId: operation.transactionId, 'operations.operationId': operation.id }, {
-        $set: {
-          'operations.$.status': operation.status,
-          refundAmountAvailable: refundAmountAvailable[0].remainingAmount,
-        },
-        $addToSet: {
-          'operations.$.statusHist': [
-            {
-              status: operation.status,
-              date: Date.now(),
-            },
-          ],
-        },
-      });
-
       // eslint-disable-next-line max-len
       const canUpdateOutstandingBalance = operation.type === 'capture' && transaction.outstandingBalance >= operation.amount && transaction.outstandingBalance > 0;
 
       await TransactionMDb.updateOne({ transactionId: operation.transactionId }, {
         $set: {
           status: trxStatus,
+          refundAmountAvailable: refundAmountAvailable[0].remainingAmount,
         },
         $inc: {
           ...(canUpdateOutstandingBalance && { outstandingBalance: -parseInt(operation.amount, 10) }),

@@ -58,7 +58,6 @@ exports.createOperation = async (req, res) => {
       type: 'capture',
       transactionId,
       amount: restBody.amount,
-      deletedAt: Date.UTC(2012, 12, 12, 12, 12, 12),
     });
   }
 
