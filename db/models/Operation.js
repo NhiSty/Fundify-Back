@@ -99,21 +99,6 @@ module.exports = (connection) => {
 
     const transaction = await TransactionMDb.findOne({ transactionId: operation.transactionId });
 
-    // Mise à jour des status des opérations
-    await TransactionMDb.updateOne({ transactionId: operation.transactionId, 'operations.operationId': operation.id }, {
-      $set: {
-        'operations.$.status': operation.status,
-      },
-      $addToSet: {
-        'operations.$.statusHist': [
-          {
-            status: operation.status,
-            date: Date.now(),
-          },
-        ],
-      },
-    });
-
     const refundAmountAvailable = await TransactionMDb.aggregate([
       { $match: { transactionId: operation.transactionId } },
       {
@@ -134,6 +119,26 @@ module.exports = (connection) => {
         },
       },
     ]).exec();
+    const canUpdateOutstandingBalance = operation.type === 'capture' && transaction.outstandingBalance >= operation.amount && transaction.outstandingBalance > 0;
+
+    // Mise à jour des status des opérations
+    await TransactionMDb.updateOne({ transactionId: operation.transactionId, 'operations.operationId': operation.id }, {
+      $set: {
+        'operations.$.status': operation.status,
+        refundAmountAvailable: refundAmountAvailable[0].remainingAmount,
+      },
+      $inc: {
+        ...(canUpdateOutstandingBalance && { outstandingBalance: -parseInt(operation.amount, 10) }),
+      },
+      $addToSet: {
+        'operations.$.statusHist': [
+          {
+            status: operation.status,
+            date: Date.now(),
+          },
+        ],
+      },
+    });
 
     const operationIsDone = operation.status === 'done';
     const operationIsCapture = operation.type === 'capture';
@@ -168,16 +173,9 @@ module.exports = (connection) => {
       await Transaction(connection).update({ status: trxStatus }, { where: { id: operation.transactionId } });
       await TransactionStatusHist(connection).create({ transactionId: operation.transactionId, status: trxStatus });
 
-      // eslint-disable-next-line max-len
-      const canUpdateOutstandingBalance = operation.type === 'capture' && transaction.outstandingBalance >= operation.amount && transaction.outstandingBalance > 0;
-
       await TransactionMDb.updateOne({ transactionId: operation.transactionId }, {
         $set: {
           status: trxStatus,
-          refundAmountAvailable: refundAmountAvailable[0].remainingAmount,
-        },
-        $inc: {
-          ...(canUpdateOutstandingBalance && { outstandingBalance: -parseInt(operation.amount, 10) }),
         },
         $addToSet: {
           statusHist: [
