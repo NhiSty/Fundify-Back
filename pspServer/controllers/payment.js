@@ -7,7 +7,7 @@ exports.verifications = async (req, res) => {
 
   res.sendStatus(200);
 
-  // Simule un délai d'attente de 5 secondes
+  // Simule un délai d'attente de 30 secondes
   setTimeout(() => {
     // eslint-disable-next-line no-use-before-define
     sendDoneNotification({
@@ -16,7 +16,7 @@ exports.verifications = async (req, res) => {
       transactionId,
       operationId,
     });
-  }, 10000);
+  }, 30000);
 };
 
 function sendDoneNotification(body) {
