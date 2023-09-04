@@ -295,6 +295,7 @@ exports.getMerchantAccount = async (req, res, next) => {
         kbis: merchant.kbis,
         clientToken: credentials.clientToken,
         clientSecret: credentials.clientSecret,
+        autoCapture: merchant.autoCapture,
       });
   } catch (e) {
     next(e);
