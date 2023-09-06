@@ -2,6 +2,7 @@ const { Model, DataTypes } = require('sequelize');
 const OperationStatusHist = require('./OperationStatusHist');
 const TransactionStatusHist = require('./TransactionStatusHist');
 const TransactionMDb = require('../../mongoDb/models/Transaction');
+const Transaction = require('./Transaction');
 
 module.exports = (connection) => {
   class Operation extends Model {}
@@ -13,7 +14,7 @@ module.exports = (connection) => {
       primaryKey: true,
     },
     type: {
-      type: DataTypes.ENUM('capture', 'refund'),
+      type: DataTypes.ENUM('capture', 'refund', 'authorization'),
       allowNull: false,
     },
     amount: {
@@ -69,19 +70,24 @@ module.exports = (connection) => {
             },
           ],
         },
-        ...(operation.type === 'refund' && {
+      },
+    });
+
+    if (operation.type === 'refund') {
+      await TransactionMDb.updateOne({ transactionId: operation.transactionId }, {
+        $set: {
+          status: 'waiting_refund',
+        },
+        $addToSet: {
           statusHist: [
             {
               status: 'waiting_refund',
               date: Date.now(),
             },
           ],
-        }),
-      },
-      $set: {
-        ...(operation.type === 'refund' && { status: 'waiting_refund' }),
-      },
-    });
+        },
+      });
+    }
   });
 
   // Après mise à jour d'une opération (Postgres) on met à jour l'opération correspondante (MongoDB)
@@ -90,6 +96,8 @@ module.exports = (connection) => {
       operationId: operation.id,
       status: operation.status,
     });
+
+    const transaction = await TransactionMDb.findOne({ transactionId: operation.transactionId });
 
     const refundAmountAvailable = await TransactionMDb.aggregate([
       { $match: { transactionId: operation.transactionId } },
@@ -111,25 +119,16 @@ module.exports = (connection) => {
         },
       },
     ]).exec();
+    const canUpdateOutstandingBalance = operation.type === 'capture' && transaction.outstandingBalance >= operation.amount && transaction.outstandingBalance > 0;
 
-    let trxStatus = 'captured';
-    const operationDone = operation.status;
-    const operationIsCapture = operation.type === 'capture';
-    const allIsRefunded = refundAmountAvailable[0].remainingAmount === 0;
-
-    if (!operationIsCapture && operationDone && allIsRefunded) {
-      trxStatus = 'refunded';
-    }
-
-    if (!operationIsCapture && operationDone && !allIsRefunded) {
-      trxStatus = 'partial_refunded';
-    }
-
-    await TransactionMDb.updateOne({ transactionId: operation.transactionId, 'operations.operationId': operation.id }, {
+    // Mise à jour des status des opérations
+    const res = await TransactionMDb.findOneAndUpdate({ transactionId: operation.transactionId, 'operations.operationId': operation.id }, {
       $set: {
         'operations.$.status': operation.status,
         refundAmountAvailable: refundAmountAvailable[0].remainingAmount,
-        ...(operation.status === 'done' && { status: trxStatus }),
+      },
+      $inc: {
+        ...(canUpdateOutstandingBalance && { outstandingBalance: -parseInt(operation.amount, 10) }),
       },
       $addToSet: {
         'operations.$.statusHist': [
@@ -138,16 +137,57 @@ module.exports = (connection) => {
             date: Date.now(),
           },
         ],
-        ...((operation.status === 'done') && {
+      },
+    }, { new: true });
+
+    const operationIsDone = operation.status === 'done';
+    const operationIsCapture = operation.type === 'capture';
+    const operationIsRefund = operation.type === 'refund';
+    const allIsRefunded = refundAmountAvailable[0].remainingAmount === 0;
+    const trxIsCompletelyCaptured = res.outstandingBalance === 0;
+
+    const getTransactionStatus = () => {
+      // Concerne les opérations de type authorization
+      if (operation.type === 'authorization') {
+        return 'authorized';
+      }
+
+      // Concerne les opérations de type capture
+      if (operationIsCapture) {
+        if (!trxIsCompletelyCaptured) {
+          return 'partial_captured';
+        } return 'captured';
+      }
+
+      // Concerne les opérations de type refund
+      if (operationIsRefund) {
+        if (allIsRefunded) {
+          return 'refunded';
+        }
+        return 'partial_refunded';
+      }
+
+      return 'uknown';
+    };
+
+    if (operationIsDone) {
+      await Transaction(connection).update({ status: getTransactionStatus() }, { where: { id: operation.transactionId } });
+      await TransactionStatusHist(connection).create({ transactionId: operation.transactionId, status: getTransactionStatus() });
+
+      await TransactionMDb.updateOne({ transactionId: operation.transactionId }, {
+        $set: {
+          status: getTransactionStatus(),
+        },
+        $addToSet: {
           statusHist: [
             {
-              status: trxStatus,
+              status: getTransactionStatus(),
               date: Date.now(),
             },
           ],
-        }),
-      },
-    });
+        },
+      });
+    }
   });
 
   return Operation;

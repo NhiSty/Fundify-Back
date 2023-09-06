@@ -19,7 +19,7 @@ module.exports = function (connection) {
         },
       },
       status: {
-        type: DataTypes.ENUM('created', 'captured', 'waiting_refund', 'partial_refunded', 'refunded', 'cancelled'),
+        type: DataTypes.ENUM('created', 'captured', 'partial_captured', 'authorized', 'waiting_refund', 'partial_refunded', 'refunded', 'cancelled'),
         defaultValue: 'created',
       },
     },

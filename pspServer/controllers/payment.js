@@ -7,7 +7,7 @@ exports.verifications = async (req, res) => {
 
   res.sendStatus(200);
 
-  // Simule un délai d'attente de 5 secondes
+  // Simule un délai d'attente de 30 secondes
   setTimeout(() => {
     // eslint-disable-next-line no-use-before-define
     sendDoneNotification({
@@ -32,7 +32,7 @@ function sendDoneNotification(body) {
   })
     .then((response) => {
       if (response.status === 200) {
-        console.log('Notification de paiement envoyée avec succès à votre API.');
+        console.log(`Notification de paiement envoyée à votre API pour la transaction ${body.transactionId}. Opération ${body.operationId}.`);
       } else {
         throw new Error('Erreur lors de l\'envoi de la notification de paiement à votre API.');
       }

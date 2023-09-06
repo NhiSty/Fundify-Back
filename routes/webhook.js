@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.post('/operation/webhook', verifyApiKey, async (req, res) => {
   const data = req.body;
-
+  console.log('in webhook', data);
   try {
     await operationCtrl.operationWebhook(data);
     return res.sendStatus(200);

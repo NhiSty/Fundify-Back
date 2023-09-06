@@ -8,7 +8,7 @@ const operationSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['capture', 'refund'],
+    enum: ['capture', 'refund', 'authorization'],
     default: 'capture',
   },
   amountOperation: {

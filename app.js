@@ -45,13 +45,13 @@ app.use((req, res, next) => {
   next();
 });
 
-// Pas de protection sur ces routes
+
 app.use('/api/auth', userRoutes.login);
 app.use('/api/auth', userRoutes.create);
 app.use('/api', sdkRoutes);
 app.use('/api', webhooks);
 
-// Routes protégées par le middleware d'authentification (seulement)
+
 app.use('/api', operationRoutes.getTransactionOperations);
 app.use('/api', merchantRoutes.getMerchantTransactionById);
 app.use('/api', merchantRoutes.getMerchant);
@@ -62,14 +62,13 @@ app.use('/api', userRoutes.updateUser);
 app.use('/api/auth', userRoutes.logout);
 app.use('/api', kpisRoute.getTransactionsStatusKPIS);
 
-// Routes protégées par le middleware d'authentification (seulement) et admin
 app.use('/api', merchantRoutes.getAllMerchants);
 app.use('/api', merchantRoutes.validateOrInvalidateMerchant);
 app.use('/api', transactionRoutes.getAllTransactions);
 app.use('/api', userRoutes.setAdmin);
 app.use('/api', userRoutes.getUsers);
 
-// Routes protégées par middleware de vérification du Bearer Token (seulement)
+
 app.use('/api', transactionRoutes.createTransaction);
 app.use('/api', merchantRoutes.getMerchantTransactions);
 app.use('/api', operationRoutes.createOperation);
