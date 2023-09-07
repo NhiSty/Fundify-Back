@@ -77,6 +77,10 @@ const transactionSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  createdDate: {
+    type: Date,
+    default: Date.now,
+  },
   status: {
     type: String,
     enum: ['created', 'captured', 'partial_captured', 'authorized', 'waiting_refund', 'partial_refunded', 'refunded', 'cancelled'],
