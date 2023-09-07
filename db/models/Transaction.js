@@ -65,6 +65,7 @@ module.exports = (connection) => {
       status: transaction.status,
       outstandingBalance: transaction.amount,
       refundAmountAvailable: transaction.amount,
+      createdDate: Date.now(),
       statusHist: [
         {
           status: transaction.status,
