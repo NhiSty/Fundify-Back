@@ -119,7 +119,7 @@ module.exports = (connection) => {
         },
       },
     ]).exec();
-    const canUpdateOutstandingBalance = operation.type === 'capture' && transaction.outstandingBalance >= operation.amount && transaction.outstandingBalance > 0;
+    const canUpdateOutstandingBalance = operation.type === 'capture' && operation.status === 'processing' && transaction.outstandingBalance >= operation.amount && transaction.outstandingBalance > 0;
 
     // Mise à jour des status des opérations
     const res = await TransactionMDb.findOneAndUpdate({ transactionId: operation.transactionId, 'operations.operationId': operation.id }, {
