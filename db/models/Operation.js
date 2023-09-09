@@ -61,7 +61,7 @@ module.exports = (connection) => {
         operations: {
           operationId: operation.id,
           type: operation.type,
-          amount: parseInt(operation.amount, 10),
+          amount: parseFloat(operation.amount, 10),
           status: operation.status,
           statusHist: [
             {
@@ -128,7 +128,7 @@ module.exports = (connection) => {
         refundAmountAvailable: refundAmountAvailable[0].remainingAmount,
       },
       $inc: {
-        ...(canUpdateOutstandingBalance && { outstandingBalance: -parseInt(operation.amount, 10) }),
+        ...(canUpdateOutstandingBalance && { outstandingBalance: -parseFloat(operation.amount, 10) }),
       },
       $addToSet: {
         'operations.$.statusHist': [
