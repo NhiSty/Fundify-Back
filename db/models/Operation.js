@@ -61,7 +61,7 @@ module.exports = (connection) => {
         operations: {
           operationId: operation.id,
           type: operation.type,
-          amount: parseInt(operation.amount, 10),
+          amount: parseFloat(operation.amount, 10),
           status: operation.status,
           statusHist: [
             {
@@ -119,7 +119,7 @@ module.exports = (connection) => {
         },
       },
     ]).exec();
-    const canUpdateOutstandingBalance = operation.type === 'capture' && transaction.outstandingBalance >= operation.amount && transaction.outstandingBalance > 0;
+    const canUpdateOutstandingBalance = operation.type === 'capture' && operation.status === 'processing' && transaction.outstandingBalance >= operation.amount && transaction.outstandingBalance > 0;
 
     // Mise à jour des status des opérations
     const res = await TransactionMDb.findOneAndUpdate({ transactionId: operation.transactionId, 'operations.operationId': operation.id }, {
@@ -128,7 +128,7 @@ module.exports = (connection) => {
         refundAmountAvailable: refundAmountAvailable[0].remainingAmount,
       },
       $inc: {
-        ...(canUpdateOutstandingBalance && { outstandingBalance: -parseInt(operation.amount, 10) }),
+        ...(canUpdateOutstandingBalance && { outstandingBalance: -parseFloat(operation.amount, 10) }),
       },
       $addToSet: {
         'operations.$.statusHist': [
