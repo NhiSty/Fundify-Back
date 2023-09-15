@@ -30,7 +30,6 @@ exports.sendForm = async (req, res) => {
       cancellationRedirectUrl: merchant.cancellationRedirectUrl,
       cancelTransaction: process.env.CANCEL_URL_TRANSACTION.replace(':id', transactionId),
       transactionStatus: transaction.status,
-      redirectUrl: process.env.SECURITY_REDIRECT_URL_TRANSACTION,
       id: merchant.id,
       clientToken: credentials.clientToken,
     });
