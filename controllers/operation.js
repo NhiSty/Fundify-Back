@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken');
 const db = require('../db/index');
 const OperationValidator = require('../validator/OperationValidator');
 const TransactionMDb = require('../mongoDb/models/Transaction');
@@ -5,11 +6,15 @@ const requestPspCheck = require('../utils/requestPspCheck');
 require('dotenv').config();
 
 exports.createOperation = async (req, res) => {
-  const { transactionId, merchantId: id } = req.body;
+  const { transactionId, merchantId: id, tokenPaymentForm } = req.body;
   const merchantId = id || req.merchantId;
 
   if (!merchantId) {
     return res.sendStatus(422);
+  }
+
+  if (tokenPaymentForm && !jwt.verify(tokenPaymentForm, process.env.SECKET_KEY_FORM_PAYMENT)) {
+    return res.sendStatus(401);
   }
 
   const merchant = await db.Merchant.findByPk(merchantId);
@@ -33,6 +38,10 @@ exports.createOperation = async (req, res) => {
 
   if (!transaction || !transactionMongo) {
     return res.sendStatus(422);
+  }
+
+  if (tokenPaymentForm && transactionMongo.operations.length > 0) {
+    return res.sendStatus(400);
   }
 
   const { type, ...restBody } = req.body;

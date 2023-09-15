@@ -1,83 +1,149 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Formulaire de paiement en ligne</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-    }
-    form {
-      max-width: 400px;
-      margin: 0 auto;
-      padding: 20px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-    }
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    label {
-      display: block;
-      margin-bottom: 5px;
-    }
-    input[type="text"],
-    input[type="submit"] {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 10px;
-      border: 1px solid #ccc;
-      border-radius: 3px;
-    }
-    input[type="submit"] {
-      background-color: #4caf50;
-      color: #fff;
-      cursor: pointer;
-    }
-    input[type="submit"]:hover {
-      background-color: #45a049;
-    }
-  </style>
+    <title>Formulaire de paiement en ligne</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        form {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"],
+        input[type="submit"] {
+            width: unset;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        input[type="submit"] {
+            background-color: #4caf50;
+            color: #fff;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .cancel-input {
+            margin-right: 10px;
+            background-color: red;
+            width: unset;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            color: #fff;
+            cursor: pointer;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
 <h1>Formulaire de paiement en ligne</h1>
 <form method="POST" id="paymentForm">
-  <label>Numéro de carte de crédit:</label>
-  <label>Prix du produit</label>
-  <% amount %>
-  <input
-          type="text"
-          name="amount"
-          required
-          disabled
-          value="<%= amount %>"
-  />
-  <label>Numéro de carte</label>
-  <input type="text" name="creditCardNumber" required />
-  <label>Date d'expiration:</label>
-  <input type="text" name="expirationDate" required />
-  <label>Code de sécurité (CVV):</label>
-  <input type="text" name="cvv" required />
-  <input type="hidden" name="url" value="<%= url %>" />
-  <input type="hidden" name="redirectUrl" value="<%= redirectUrl %>" />
-  <input type="hidden" name="id" value="<%= id %>" />
-  <input type="hidden" name="clientToken" value="<%= clientToken %>" />
+    <label>Numéro de carte de crédit:</label>
+    <div class="form-group">
+        <label>Prix du produit</label>
+        <% amount %>
+        <input
+                type="text"
+                name="amount"
+                required
+                disabled
+                value="<%= amount %>"
+        />
+    </div>
+    <div class="form-group">
+        <label>Numéro de carte</label>
+        <input id="creditCardNumber" min="19" maxlength="19" type="text" name="creditCardNumber" required />
+    </div>
+    <div class="form-group">
+        <label>Date d'expiration:</label>
+        <input id="expirationDate" type="text" minlength="5" maxlength="5" name="expirationDate" required />
+    </div>
+    <div class="form-group">
+        <label>Code de sécurité (CVV):</label>
+        <input id="cvv" maxlength="3" minlength="3" type="text" name="cvv" required />
+    </div>
 
-  <input type="submit" value="Valider le paiement" />
+    <button id="cancelButton" type="button" class="cancel-input">Annuler le paiement</button>
+    <input type="submit" value="Valider le paiement" />
 </form>
 </body>
 <script>
-  function getUUIDFromURL() {
-    const url = window.location.href;
-    const parts = url.split("/");
-    const uuid = parts[parts.length - 1];
-    return uuid;
-  }
+    const clientToken = '<%- clientToken %>';
+    const url = '<%- url %>';
+    const redirectUrl = '<%- redirectUrl %>';
+    const transactionStatus = '<%- transactionStatus %>';
+    const cancelTransaction = '<%- cancelTransaction %>';
+    const confirmationRedirectUrl = '<%- confirmationRedirectUrl %>';
+    const cancellationRedirectUrl = '<%- cancellationRedirectUrl %>';
+    const id = '<%- id %>';
+    const amount = '<%- amount %>';
+    const tokenPaymentForm = '<%- tokenPaymentForm %>'
 
-  document
-          .getElementById("paymentForm")
-          .addEventListener("submit", async (event) => {
+    function getUUIDFromURL() {
+        const url = window.location.href;
+        const parts = url.split("/");
+        const uuid = parts[parts.length - 1];
+        return uuid;
+    }
+
+    document
+        .getElementById('cancelButton')
+        .addEventListener('click', async () => {
+            const transactionId = getUUIDFromURL();
+
+            // Effectuer une requête POST en utilisant fetch()
+            try {
+                const response = await fetch(cancelTransaction, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${id}:${clientToken}`
+                    },
+                    body: JSON.stringify({
+                        transactionId: transactionId,
+                        status: 'cancelled'
+                    }),
+                });
+
+                if (response.ok) {
+                    console.log('ok')
+                    console.log(confirmationRedirectUrl, 'url')
+                    console.log(cancellationRedirectUrl, 'url-2')
+                    // Rediriger l'utilisateur vers la page de confirmation
+                    window.location.href = cancellationRedirectUrl;
+                    // Traitez la réponse ici si nécessaire
+                }
+            } catch (error) {
+                console.log("Erreur lors du paiement :", error);
+                // Traitez l'erreur ici si nécessaire
+            }
+        })
+
+    const form = document.getElementById("paymentForm");
+    document
+        .getElementById("paymentForm")
+        .addEventListener("submit", async (event) => {
             event.preventDefault(); // Empêche la soumission automatique du formulaire
 
             // Récupérer l'ID de l'URL (à remplacer avec votre propre méthode d'obtention de l'ID)
@@ -85,56 +151,144 @@
 
             // Récupérer les valeurs des champs du formulaire
             const creditCardNumber = document.querySelector(
-                    'input[name="creditCardNumber"]'
+                'input[name="creditCardNumber"]'
             ).value;
             const expirationDate = document.querySelector(
-                    'input[name="expirationDate"]'
+                'input[name="expirationDate"]'
             ).value;
+
             const cvv = document.querySelector('input[name="cvv"]').value;
-            const url = document.querySelector('input[name="url"]').value;
-            const amount = document.querySelector('input[name="amount"]').value;
-            const redirectUrl = document.querySelector(
-                    'input[name="redirectUrl"]'
-            ).value;
 
-            const id = document.querySelector(
-                    'input[name="id"]'
-            ).value;
+            if (creditCardNumber.length < 19) {
+                alert('Le numéro de carte de crédit doit contenir 16 chiffres')
+                return
+            }
 
-            const clientToken = document.querySelector(
-                    'input[name="clientToken"]'
-            ).value;
+            if (expirationDate.length < 5) {
+                alert('La date d\'expiration doit être au format MM/AA')
+                return
+            }
 
+            if (parseInt(expirationDate.slice(0, 2)) > 12 || parseInt(expirationDate.slice(0, 2)) < 1) {
+                alert('Le mois de la date d\'expiration doit être compris entre 01 et 12')
+                return
+            }
+
+            if (cvv.length < 3) {
+                alert('Le CVV doit contenir 3 chiffres')
+                return
+            }
 
             // Données du formulaire à envoyer dans la requête POST
             const formData = {
-              transactionId: transactionId,
-              creditCardNumber: creditCardNumber,
-              expirationDate: expirationDate,
-              cvv: cvv,
-              amount: parseFloat(amount),
-              merchantId: id,
+                transactionId: transactionId,
+                creditCardNumber: creditCardNumber,
+                expirationDate: expirationDate,
+                cvv: cvv,
+                amount: parseFloat(amount),
+                merchantId: id,
             };
             // Effectuer une requête POST en utilisant fetch()
             try {
-              const response = await fetch(url, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${id}:${clientToken}`
-                },
-                body: JSON.stringify(formData),
-              });
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${id}:${clientToken}`
+                    },
+                    body: JSON.stringify({
+                        ...formData,
+                        tokenPaymentForm,
+                    }),
+                });
 
-              if (response.ok) {
-                // Rediriger l'utilisateur vers la page de confirmation
-                window.location.href = redirectUrl;
-                // Traitez la réponse ici si nécessaire
-              }
+                if (response.ok) {
+                    // Rediriger l'utilisateur vers la page de confirmation
+                    window.location.href = confirmationRedirectUrl;
+                    // Traitez la réponse ici si nécessaire
+                } else {
+                    alert('Une erreur est survenue lors du paiement')
+                }
             } catch (error) {
-              console.log("Erreur lors du paiement :", error);
-              // Traitez l'erreur ici si nécessaire
+                console.log("Erreur lors du paiement :", error);
+                // Traitez l'erreur ici si nécessaire
             }
-          });
+        });
+
+    // Fonction pour formater un numéro de carte de crédit
+    function formatCreditCardNumber(input) {
+        // Supprimer tous les caractères non numériques
+        const cleanedValue = input.value.replace(/\D/g, '');
+
+        // Vérifier si la valeur dépasse la longueur maximale d'une carte de crédit
+        if (cleanedValue.length > 16) {
+            return;
+        }
+
+        // Formater le numéro de carte de crédit en groupes de 4 chiffres séparés par un espace
+        let formattedValue = '';
+        for (let i = 0; i < cleanedValue.length; i++) {
+            if (i > 0 && i % 4 === 0) {
+                formattedValue += ' '; // Ajouter un espace après chaque groupe de 4 chiffres
+            }
+            formattedValue += cleanedValue[i];
+        }
+
+        // Mettre à jour la valeur du champ de texte avec la version formatée
+        input.value = formattedValue;
+    }
+
+    // Obtenez une référence à l'élément d'entrée (input) sur lequel vous souhaitez appliquer le formatage
+    const inputElement = document.getElementById('creditCardNumber'); // Remplacez 'votreInput' par l'ID de votre input
+
+    // Écoutez l'événement "input" sur l'élément d'entrée pour appeler la fonction de formatage
+    inputElement.addEventListener('input', function () {
+        formatCreditCardNumber(this);
+    });
+
+    // Fonction pour formater la date d'expiration au format "MM/AA"
+    function formatExpirationDate(input) {
+        // Supprimer tous les caractères non numériques
+        const cleanedValue = input.value.replace(/\D/g, '');
+
+        // Vérifier si la valeur dépasse la longueur maximale de la date d'expiration (4 caractères)
+        if (cleanedValue.length > 4) {
+            return;
+        }
+
+        // Formater la date d'expiration en "MM/AA" en ajoutant un "/" entre le mois et l'année
+        let formattedValue = '';
+        for (let i = 0; i < cleanedValue.length; i++) {
+            if (i === 2 && cleanedValue.length > 2) {
+                formattedValue += '/'; // Ajouter "/" après le mois
+            }
+            formattedValue += cleanedValue[i];
+        }
+
+        // Mettre à jour la valeur du champ de texte avec la version formatée
+        input.value = formattedValue;
+    }
+
+    // Obtenez une référence à l'élément d'entrée (input) de la date d'expiration
+    const expirationInput = document.getElementById('expirationDate'); // Remplacez 'votreInputExpiration' par l'ID de votre input
+
+    // Écoutez l'événement "input" sur l'élément d'entrée pour appeler la fonction de formatage
+    expirationInput.addEventListener('input', function () {
+        formatExpirationDate(this);
+    });
+
+    // Fonction pour valider l'input CVV en n'acceptant que des chiffres
+    function validateCVV(input) {
+        input.value = input.value.replace(/\D/g, ''); // Supprimer tous les caractères non numériques
+    }
+
+    // Obtenez une référence à l'élément d'entrée (input) du CVV
+    const cvvInput = document.getElementById('cvv'); // Remplacez 'votreInputCVV' par l'ID de votre input CVV
+
+    // Écoutez l'événement "input" sur l'élément d'entrée pour valider le CVV
+    cvvInput.addEventListener('input', function () {
+        validateCVV(this);
+    });
+
 </script>
 </html>

@@ -117,3 +117,51 @@ exports.getMerchantTransactions = async (req, res, next) => {
     next(error);
   }
 };
+
+// eslint-disable-next-line consistent-return
+exports.putTransaction = async (req, res, next) => {
+  const transactionId = req.params.id;
+  const {
+    status,
+    amount,
+    currency,
+  } = req.body;
+
+  if (!transactionId) {
+    return res.sendStatus(422);
+  }
+
+  try {
+    if (amount && !TransactionValidator.validateAmount(amount)) {
+      throw new Error('422 Unprocessable Entity');
+    }
+
+    if (currency && !TransactionValidator.validateCurrency(currency)) {
+      throw new Error('422 Unprocessable Entity');
+    }
+
+    if (status && !TransactionValidator.validateStatus(status)) {
+      throw new Error('422 Unprocessable Entity');
+    }
+
+    const transaction = await db.Transaction.findByPk(transactionId);
+
+    if (!transaction) {
+      return res.sendStatus(400);
+    }
+
+    await transaction.update({
+      status,
+    });
+
+    await TransactionMDb.findOneAndUpdate({ transactionId }, {
+      $set: {
+        status,
+      },
+    });
+
+    return res.sendStatus(200);
+  } catch (error) {
+    next(error);
+  }
+};
